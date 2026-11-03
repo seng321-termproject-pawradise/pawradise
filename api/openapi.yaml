@@ -1,0 +1,11 @@
+
+openapi: 3.0.3
+
+info:
+  title: pawradise - Animal Shelter & Adoption System API
+  version: 0.1.0
+  description: >
+    Initial OpenAPI specification for the SENG 321
+    Animal Shelter & Adoption System project.
+
+paths: {}
