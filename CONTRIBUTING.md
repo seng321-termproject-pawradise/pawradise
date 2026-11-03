@@ -28,10 +28,10 @@ The repository follows a Git-Flow-based branching strategy.
 - Feature branches should use descriptive names.
 
 Example branch names:
-- `feature/repository-setup`
-- `feature/animal-listings`
-- `feature/adoption-applications`
-
+- `feature/1-repository-setup`
+- `feature/12-vision-boundary`
+- `feature/13-animal-listings`
+  
 ## 3. Development Workflow
 
 All tasks must follow this workflow:
