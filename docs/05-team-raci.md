@@ -7,7 +7,7 @@
 | Course | SENG 321 – Software Engineering |
 | Semester | Fall 2026 |
 | Team Number | `Team <XX>` |
-| Project Name | Animal Shelter & Adoption System |
+| Project Name | Pawradise – Animal Shelter & Adoption System |
 | Project Type | Web Application |
 | Repository | https://github.com/seng321-termproject-pawradise/pawradise |
 | Project Board | `https://github.com/orgs/seng321-termproject-pawradise/projects/<n>` |
@@ -19,12 +19,12 @@ Every member uses an individual GitHub account, so that contributions are tracea
 
 | # | Name | GitHub Username | Role | Abbreviation |
 |---|---|---|---|---|
-| 1 | İlayda `<Surname>` | `@<username>` | Product Owner and Requirements Engineer | PO |
-| 2 | Sıla `<Surname>` | @sevvalsilacelik | Scrum Master and Agile Process Coach | SM |
-| 3 | Işıl `<Surname>` | @gltknisil | Lead Software Architect and Technical Lead | ARCH |
-| 4 | Efekan `<Surname>` | `@<username>` | Quality Assurance and Test Automation Engineer | QA |
-| 5 | İlay `<Surname>` | @aslnurilay | DevOps and CI/CD Infrastructure Engineer | DEVOPS |
-| 6 | Fatma `<Surname>` | `@<username>` | Implementation and Integration Engineer | IMPL |
+| 1 | İlayda Ersin | @ilayda-ersin | Product Owner and Requirements Engineer | PO |
+| 2 | Şevval Sıla Çelik | @sevvalsilacelik | Scrum Master and Agile Process Coach | SM |
+| 3 | Işıl Gültekin | @gltknisil | Lead Software Architect and Technical Lead | ARCH |
+| 4 | Efekan Coşkun | @VarnaToent0 | Quality Assurance and Test Automation Engineer | QA |
+| 5 | Aslınur İlay Tekin | @aslnurilay | DevOps and CI/CD Infrastructure Engineer | DEVOPS |
+| 6 | Fatma Nur Kodak | @fnurkodak | Implementation and Integration Engineer | IMPL |
 
 ## 3. Roles and Responsibilities
 
@@ -33,7 +33,7 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 ### 3.1 Product Owner and Requirements Engineer (PO) – Product
 
 - Owns the product vision and the official requirements reference (FR, NFR, BR).
-- Prepares the Project Proposal and the System Vision and Boundary.
+- Prepares the Project Proposal.
 - Writes epics and user stories with acceptance criteria, estimates, dependencies, and owners.
 - Maintains and prioritizes the product backlog.
 - Ensures traceability between requirements, backlog items, API endpoints, and the implemented product.
@@ -51,6 +51,7 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 ### 3.3 Lead Software Architect and Technical Lead (ARCH) – Architecture
 
 - Defines the system and software architecture (C4 model, UML diagrams).
+- Prepares the System Vision and Boundary and the main API flows.
 - Leads the API-first design and owns the OpenAPI specification.
 - Makes and documents architectural and technology decisions.
 - Leads code reviews and maintains technical consistency.
@@ -60,7 +61,7 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 - Prepares test plans and the test strategy.
 - Reviews acceptance criteria and the OpenAPI contract for testability.
 - Develops unit, integration, and end-to-end tests.
-- Tracks defects and monitors unit-test coverage (minimum 50 percent).
+- Tracks defects and monitors unit-test coverage.
 
 ### 3.5 DevOps and CI/CD Infrastructure Engineer (DEVOPS) – DevOps
 
@@ -102,6 +103,7 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Requirements Engineering | **A/R** | I | C | C | I | C |
 | Project Proposal | **A/R** | C | C | I | I | I |
+| System Vision and Boundary | C | I | **A/R** | C | I | C |
 | System Architecture | C | I | **A/R** | C | C | R |
 | OpenAPI Design | C | I | **A/R** | C | I | R |
 | Frontend Development | C | I | **A** | C | I | R |
@@ -128,15 +130,15 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 
 | # | Deliverable | Accountable | Responsible | Location | Issue |
 |---|---|---|---|---|---|
-| 1 | Project Proposal (including open-source license) | PO | PO | `docs/01-project-proposal.md`, `LICENSE` | `#<n>` |
-| 2 | System Vision and System Boundary | PO | PO | `docs/02-system-vision.md` | #4 |
-| 3 | OpenAPI Draft (YAML) | ARCH | ARCH, IMPL | `api/openapi.yaml` | #6 |
-| 4 | Team Roles and RACI Matrix | SM | SM | `docs/03-team-raci.md` | #10 |
+| 1 | Project Proposal (including open-source license) | PO | PO | `docs/01-proposal.md`, `LICENSE` | `#<n>` |
+| 2 | System Vision and System Boundary | ARCH | ARCH | `docs/02-vision-boundary.md` | #4 |
+| 3 | OpenAPI Draft (YAML) | ARCH | ARCH, IMPL | `api/openapi.yaml`, `docs/03-api-flows.md` | #6 |
+| 4 | Team Roles and RACI Matrix | SM | SM | `docs/05-team-raci.md` | #10 |
 | 5 | Contribution Guidelines and Git-Flow Rules | SM | SM | `CONTRIBUTING.md` | #3, #12 |
 | 6 | GitHub Organization, Repository, and Branch Protection | DEVOPS | DEVOPS | Repository settings | #1 |
-| 7 | Initial Product Backlog | PO | PO | GitHub Projects board, `docs/04-product-backlog.md` | `#<n>` |
+| 7 | Initial Product Backlog | PO | PO | GitHub Projects board, `docs/04-backlog.md` | `#<n>` |
 | 8 | Review of acceptance criteria and API for testability | QA | QA | Pull request reviews | `#<n>` |
-| 9 | Sprint 1 Submission Document and Release | SM | SM | `docs/sprint-1-submission.md`, tag `v0.1.0-sprint1` | #13 |
+| 9 | Sprint 1 Submission Document and Release | SM | SM | `docs/sprint-1-submission.md`, tag `sprint-1` | #13 |
 
 ## 6. Approval
 
@@ -144,4 +146,4 @@ This document was reviewed and accepted by all team members through its pull req
 
 | Version | Date | Change | Pull Request |
 |---|---|---|---|
-| 1.0 | 2026-11-03 | Initial team roles and RACI matrix | `#<n>` |
+| 1.0 | 2026-11-03 | Initial team roles and RACI matrix | #17 |
