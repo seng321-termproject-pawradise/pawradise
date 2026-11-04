@@ -130,13 +130,13 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 
 | # | Deliverable | Accountable | Responsible | Location | Issue |
 |---|---|---|---|---|---|
-| 1 | Project Proposal (including open-source license) | PO | PO | `docs/01-proposal.md`, `LICENSE` | `#<n>` |
+| 1 | Project Proposal (including open-source license) | PO | PO | `docs/01-proposal.md`, `LICENSE` | #20 |
 | 2 | System Vision and System Boundary | ARCH | ARCH | `docs/02-vision-boundary.md` | #4 |
 | 3 | OpenAPI Draft (YAML) | ARCH | ARCH, IMPL | `api/openapi.yaml`, `docs/03-api-flows.md` | #6 |
 | 4 | Team Roles and RACI Matrix | SM | SM | `docs/05-team-raci.md` | #10 |
 | 5 | Contribution Guidelines and Git-Flow Rules | SM | SM | `CONTRIBUTING.md` | #3, #12 |
 | 6 | GitHub Organization, Repository, and Branch Protection | DEVOPS | DEVOPS | Repository settings | #1 |
-| 7 | Initial Product Backlog | PO | PO | GitHub Projects board, `docs/04-backlog.md` | `#<n>` |
+| 7 | Initial Product Backlog | PO | PO | GitHub Projects board, `docs/04-backlog.md` | #21 |
 | 8 | Review of acceptance criteria and API for testability | QA | QA | Pull request reviews | `#<n>` |
 | 9 | Sprint 1 Submission Document and Release | SM | SM | `docs/sprint-1-submission.md`, tag `sprint-1` | #13 |
 
