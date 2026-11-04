@@ -19,7 +19,7 @@ Recorded by: Şevval Sıla Çelik (Scrum Master)
 | L7 | 2 Nov 2026 | Repository | İlay created the GitHub organization and repository and invited all members | All members | Repository |
 | L8 | 3 Nov 2026 | Timeline | All work is pushed to GitHub by Wednesday 4 Nov, 18:00–19:00, followed by a final team review; submission on Thursday 5 Nov | All members | Sprint 1 plan |
 | L9 | 3 Nov 2026 | QA tasks | QA responsibilities for Sprint 1 were listed: requirements review, acceptance criteria review, test scenario planning, API contract review, traceability review, and PR reviews | Fatma, Efekan | `docs/05-team-raci.md` §3.4 |
-| L10 | Sprint 1 | BR-07 and BR-08 clarifications | Pending applications of a banned adopter are automatically rejected (BR-07). Animals with status Reserved or Adopted count toward the three-animal limit (BR-08). | Proposed by Işıl in the System Vision; approved through PR #5 review | `docs/02-vision-boundary.md` §5.7, `api/openapi.yaml` |
+| L10 | 3 Nov 2026 | BR-07 and BR-08 clarifications | Pending applications of a banned adopter are automatically rejected (BR-07). Animals with status Reserved or Adopted count toward the three-animal limit (BR-08). | Proposed by Işıl in the System Vision; approved through PR #5 review | `docs/02-vision-boundary.md` §5.7, `api/openapi.yaml` |
 
 ## Raised Concerns
 
