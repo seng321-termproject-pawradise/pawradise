@@ -33,13 +33,13 @@ Across municipal and non-profit animal welfare ecosystems, companion animal shel
 
 # 3. Proposed Solution & Strict State Transition Model
 
-**• Strict Animal Transitions:** Available -\> Reserved -\> Adopted (via physical handover) OR Available -\> Archived (via soft-delete/moderation). Reserved -\> Archived is strictly not permitted.
+**• Strict Animal Transitions:** Available -\> Reserved -\> Adopted (via physical handover) OR Available -\> Archived (via soft-delete/moderation). Reserved -\> Archived is strictly not permitted. The procedure for a Reserved animal whose handover does not take place (for example, a return to Available) is not yet defined and is tracked as OI-01 (Open); no such transition is assumed in Sprint 1.
 
 **• Strict Application Transitions:** Pending -\> Approved OR Pending -\> Rejected OR Pending -\> Withdrawn.
 
-**• BR-08 Pet Quota Rule:** An adopter shall not have more than three animals in total with Reserved or Adopted status at the same time. Available and Archived animals do not count. Strictly evaluated at approval time; aborts with 422 Unprocessable Content if violated.
+**• BR-08 Pet Quota Rule:** An adopter shall not have more than three animals in total with Reserved or Adopted status at the same time. Available and Archived animals do not count. Strictly evaluated at approval time; aborts with 422 Unprocessable Content if violated. *(Team decision, 3 Nov 2026; recorded in System Vision §5.7 and the Sprint 1 decision log, L10; closes OI-02.)*
 
-**• BR-07 User Ban Rule:** When an adopter is banned, all of their Pending applications are automatically rejected; Approved applications remain unchanged.
+**• BR-07 User Ban Rule:** When an adopter is banned, all of their Pending applications are automatically rejected; Approved applications remain unchanged. The ban and the automatic rejections run in the same database transaction. *(Team decision, 3 Nov 2026; recorded in System Vision §5.7 and the Sprint 1 decision log, L10; closes OI-03.)*
 
 **• Atomic Single Approval & Handover:** Approving one application marks the animal Reserved and auto-rejects competing pending applications. Final transition to Adopted occurs strictly upon physical handover.
 
