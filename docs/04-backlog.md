@@ -84,11 +84,11 @@ This table establishes traceability between the official Functional Requirements
 |---|---|---|---|
 | FR-01 | US-01 | registerUser, loginUser, logoutUser | Defined |
 | FR-02 | US-01 | JWT bearer authentication and role-based authorization | Defined |
-| FR-03 | US-02, US-03 | Planned shelter registration submission and review operations | Defined in extended API draft |
-| FR-04 | US-03 | Planned shelter approval and rejection operations | Defined in extended API draft |
+| FR-03 | US-02, US-03 | Planned shelter registration submission and review operations | 	Planned (Sprint 2) |
+| FR-04 | US-03 | Planned shelter approval and rejection operations | 	Planned (Sprint 2) |
 | FR-05 | US-05 | archiveAnimal | Defined |
-| FR-06 | US-04 | Planned banUser, unbanUser operations | Defined in extended API draft |
-| FR-07 | US-06 | Planned shelter profile operations | Defined in extended API draft |
+| FR-06 | US-04 | Planned banUser, unbanUser operations | 	Planned (Sprint 2) |
+| FR-07 | US-06 | Planned shelter profile operations | 	Planned (Sprint 2) |
 | FR-08 | US-07 | createAnimal | Defined |
 | FR-09 | US-08 | updateAnimal, archiveAnimal | Defined |
 | FR-10 | US-14 | listApplications | Defined |
@@ -98,7 +98,7 @@ This table establishes traceability between the official Functional Requirements
 | FR-14 | US-10 | listAnimals | Defined |
 | FR-15 | US-11 | getAnimal | Defined |
 | FR-16 | US-12 | submitApplication | Defined |
-| FR-17 | US-13 | listApplications | Defined |
+| FR-17 | US-13 | listApplications, getApplication | Defined |
 | FR-18 | US-13 | withdrawApplication | Defined |
 | FR-19 | US-14 | approveApplication | Defined |
 | FR-20 | US-14 | approveApplication | Defined |
@@ -106,6 +106,6 @@ This table establishes traceability between the official Functional Requirements
 
 **Notes:**
 - Operation IDs refer to the OpenAPI specification in `api/openapi.yaml`.
-- Shelter registration, administration, and shelter profile operations are included in the extended API draft.
+- Shelter registration, administration, and shelter profile operations are planned for Sprint 2 (see PR #25).
 - Status history retrieval and immutable audit logging must comply with BR-09 and NFR-09.
 - Requirements marked as planned or pending must not be interpreted as fully implemented functionality.
