@@ -153,8 +153,9 @@ Detailed installation, configuration, and execution instructions will be provide
 |---|---|
 | `docs/01-proposal.md` | Project Proposal |
 | `docs/02-vision-boundary.md` | System Vision and Boundary |
-| `docs/03-team-raci.md` | Team Roles and RACI Matrix |
+| `docs/03-api-flows.md` | API Flows |
 | `docs/04-backlog.md` | Initial Product Backlog |
+| `docs/05-team-raci.md` | Team Roles and RACI Matrix |
 | `api/openapi.yaml` | API Specification |
 | `CONTRIBUTING.md` | Contribution Guidelines |
 
