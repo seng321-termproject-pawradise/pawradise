@@ -75,3 +75,37 @@
 # 8. Open Issues and Clarification Topics
 
 **• OI-01:** Undefined exit from Reserved status if an approved adopter abandons the adoption prior to physical handover (Open). **• OI-02:** Count of Reserved animals in adoption quota (Closed: Reserved animals count toward the limit per BR-08). **• OI-03:** Status of pending applications for post-banned users (Closed: Pending applications automatically rejected per BR-07). **• OI-04:** Shelter registration statuses (Open). **• OI-05:** Supported species enumeration (Open). **• OI-06:** Interpretation of 'Remove' in FR-05 (Open). **• OI-07:** Mandatory documents list beyond apartment permission (Open). **Additional Open Issues (Pending Discussion):** Document MIME type validation, Reservation timeout window, Multi-shelter staff relationships.
+
+# 9. Requirements Traceability: FR → User Story → API Mapping
+
+This table establishes traceability between the official Functional Requirements, Product Backlog User Stories, and the corresponding API operations.
+
+| Functional Requirement | User Story | API Operation(s) | Coverage |
+|---|---|---|---|
+| FR-01 | US-01 | registerUser, loginUser, logoutUser | Defined |
+| FR-02 | US-01 | JWT bearer authentication and role-based authorization | Defined |
+| FR-03 | US-02, US-03 | Planned shelter registration submission and review operations | Defined in extended API draft |
+| FR-04 | US-03 | Planned shelter approval and rejection operations | Defined in extended API draft |
+| FR-05 | US-05 | archiveAnimal | Defined |
+| FR-06 | US-04 | Planned banUser, unbanUser operations | Defined in extended API draft |
+| FR-07 | US-06 | Planned shelter profile operations | Defined in extended API draft |
+| FR-08 | US-07 | createAnimal | Defined |
+| FR-09 | US-08 | updateAnimal, archiveAnimal | Defined |
+| FR-10 | US-14 | listApplications | Defined |
+| FR-11 | US-14 | approveApplication, rejectApplication | Defined |
+| FR-12 | US-09 | recordHandover | Defined |
+| FR-13 | US-10 | listAnimals | Defined |
+| FR-14 | US-10 | listAnimals | Defined |
+| FR-15 | US-11 | getAnimal | Defined |
+| FR-16 | US-12 | submitApplication | Defined |
+| FR-17 | US-13 | listApplications | Defined |
+| FR-18 | US-13 | withdrawApplication | Defined |
+| FR-19 | US-14 | approveApplication | Defined |
+| FR-20 | US-14 | approveApplication | Defined |
+| FR-21 | US-15 | getAnimalStatusHistory, getApplication | Defined / Audit implementation pending |
+
+**Notes:**
+- Operation IDs refer to the OpenAPI specification in `api/openapi.yaml`.
+- Shelter registration, administration, and shelter profile operations are included in the extended API draft.
+- Status history retrieval and immutable audit logging must comply with BR-09 and NFR-09.
+- Requirements marked as planned or pending must not be interpreted as fully implemented functionality.
