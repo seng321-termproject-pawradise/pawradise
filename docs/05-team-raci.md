@@ -6,11 +6,11 @@
 |---|---|
 | Course | SENG 321 – Software Engineering |
 | Semester | Fall 2026 |
-| Team Number | `Team <XX>` |
+| Team Number | Team 20 |
 | Project Name | Pawradise – Animal Shelter & Adoption System |
 | Project Type | Web Application |
 | Repository | https://github.com/seng321-termproject-pawradise/pawradise |
-| Project Board | `https://github.com/orgs/seng321-termproject-pawradise/projects/<n>` |
+| Project Board | https://github.com/orgs/seng321-termproject-pawradise/projects/2 |
 | Requirements Source | Official Requirements Reference (FR-01 … FR-21, NFR-01 … NFR-09, BR-01 … BR-09) |
 
 ## 2. Team Members and Roles
