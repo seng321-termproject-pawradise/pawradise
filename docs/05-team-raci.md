@@ -19,7 +19,7 @@ Every member uses an individual GitHub account, so that contributions are tracea
 
 | # | Name | GitHub Username | Role | Abbreviation |
 |---|---|---|---|---|
-| 1 | İlayda Ersin | @ilayda-ersin | Product Owner and Requirements Engineer | PO |
+| 1 | İlayda Erşin | @ilayda-ersin | Product Owner and Requirements Engineer | PO |
 | 2 | Şevval Sıla Çelik | @sevvalsilacelik | Scrum Master and Agile Process Coach | SM |
 | 3 | Işıl Gültekin | @gltknisil | Lead Software Architect and Technical Lead | ARCH |
 | 4 | Efekan Coşkun | @VarnaToent0 | Quality Assurance and Test Automation Engineer | QA |
