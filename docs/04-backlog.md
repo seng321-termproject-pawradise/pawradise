@@ -4,7 +4,19 @@
 
 **Definition of Ready (DoR):** A story is Ready when it follows standard user story syntax, links directly to official FR IDs (FR-01..FR-21), has testable Given/When/Then acceptance criteria covering exact HTTP error codes, maps to OpenAPI operationIds or marks them planned, carries a Fibonacci estimate (\<= 8 pts), states acyclic prerequisites, designates a role owner, and is approved by the PO.
 
-**Definition of Done (DoD):** A story is Done when the work satisfies all acceptance criteria, is developed on a feature branch, is merged into develop through a pull request with at least one approving review, and conforms to the OpenAPI contract.
+**Definition of Done (DoD):** A task or user story is Done only when all applicable conditions below are met:
+
+- A related GitHub Issue exists and is referenced in the pull request.
+- The implementation or documentation described in the Issue is complete.
+- All acceptance criteria are satisfied and relevant testing or validation results are recorded in the PR.
+- Changes are developed on a feature branch.
+- The related pull request has been reviewed by another team member.
+- At least one approval has been obtained before merging.
+- The changes have been merged into `develop`.
+- Related documentation is updated when necessary.
+- API-related changes conform to the OpenAPI contract.
+
+For documentation-only tasks, validation means checking content, consistency, links, and formatting as applicable; application execution is not required.
 
 # 2. Backlog Summary Table
 
