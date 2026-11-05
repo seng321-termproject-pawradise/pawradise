@@ -14,12 +14,11 @@ info:
     Animal Shelter & Adoption System project.
 
 
-    Scope of this draft: Authentication, Animals, Applications, and
-    Application Approval. Admin shelter-registration, user-ban, and
-    shelter-profile endpoints (FR-03, FR-04, FR-06, FR-07) will be added
-    in a later version. The agreed ban behavior (Pending applications of
-    a banned adopter are automatically rejected, BR-07) is documented in
-    docs/03-api-flows.md (F8) for the future ban endpoint.
+    Scope of this draft: Authentication, Animals, Applications,
+    Application Approval, Admin operations, and Shelter Profile management.
+    When an adopter is banned, all of their Pending applications are
+    automatically rejected (BR-07). Reserved and Adopted animals both
+    count toward the maximum of three animals per adopter (BR-08).
 
 
     Requirement IDs (FR, NFR, BR) refer to the Official Requirements
@@ -39,6 +38,10 @@ tags:
     description: Adoption application submission, tracking, and withdrawal
   - name: Application Approval
     description: Approval and rejection of adoption applications by shelter owners
+  - name: Admin
+    description: Shelter registration review, user banning, and listing moderation (FR-03, FR-04, FR-05, FR-06)
+  - name: Shelters
+    description: Shelter profile registration and management (FR-07)
 
 security:
   - bearerAuth: []
@@ -725,6 +728,256 @@ paths:
                 error: CONFLICT
                 message: Only applications with status Pending can be rejected.
 
+  # ---------------------------------------------------------------------------
+  # Shelter Profiles
+  # ---------------------------------------------------------------------------
+  /shelters:
+    post:
+      tags: [Shelters]
+      operationId: createShelterProfile
+      summary: Submit a shelter profile for registration review (FR-07)
+      description: >
+        Shelter Owner only. Creates a shelter profile with Pending status.
+        The profile must be approved by an Admin before the shelter can use
+        shelter-management operations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewShelterProfile'
+            example:
+              name: Pati Dostlari Shelter
+              address: Ankara, Türkiye
+              contactEmail: contact@patidostlari.example
+              phone: '+90 312 555 0101'
+              description: A local animal shelter.
+      responses:
+        '201':
+          description: Shelter profile submitted for review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShelterProfile'
+              example:
+                id: 12
+                ownerUserId: 7
+                name: Pati Dostlari Shelter
+                address: Ankara, Türkiye
+                contactEmail: contact@patidostlari.example
+                phone: '+90 312 555 0101'
+                description: A local animal shelter.
+                status: Pending
+                createdAt: '2026-11-04T10:00:00Z'
+                updatedAt: '2026-11-04T10:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /shelters/me:
+    get:
+      tags: [Shelters]
+      operationId: getMyShelterProfile
+      summary: View the current shelter owner's profile (FR-07)
+      description: Shelter Owner only. Returns the profile associated with the authenticated user.
+      responses:
+        '200':
+          description: Shelter profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShelterProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [Shelters]
+      operationId: updateMyShelterProfile
+      summary: Update the current shelter owner's profile (FR-07)
+      description: >
+        Shelter Owner only. Updates the profile associated with the
+        authenticated user. The registration status cannot be changed here.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShelterProfileUpdate'
+            example:
+              phone: '+90 312 555 0102'
+              description: Updated shelter contact information.
+      responses:
+        '200':
+          description: Shelter profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShelterProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  # ---------------------------------------------------------------------------
+  # Admin
+  # ---------------------------------------------------------------------------
+  /admin/shelters/requests:
+    get:
+      tags: [Admin]
+      operationId: listShelterRegistrationRequests
+      summary: View shelter registration requests (FR-03)
+      description: Admin only. Returns shelter profiles awaiting registration review.
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ShelterRegistrationStatus'
+          example: Pending
+      responses:
+        '200':
+          description: Shelter registration requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShelterProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /admin/shelters/{shelterId}/approve:
+    parameters:
+      - $ref: '#/components/parameters/ShelterId'
+    post:
+      tags: [Admin]
+      operationId: approveShelterRegistration
+      summary: Approve a shelter registration request (FR-04)
+      description: Admin only. Changes the shelter registration status from Pending to Approved.
+      responses:
+        '200':
+          description: Shelter registration approved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShelterProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /admin/shelters/{shelterId}/reject:
+    parameters:
+      - $ref: '#/components/parameters/ShelterId'
+    post:
+      tags: [Admin]
+      operationId: rejectShelterRegistration
+      summary: Reject a shelter registration request (FR-04)
+      description: Admin only. Changes the shelter registration status from Pending to Rejected.
+      responses:
+        '200':
+          description: Shelter registration rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShelterProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /admin/users/{userId}/ban:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    post:
+      tags: [Admin]
+      operationId: banUser
+      summary: Ban a user (FR-06, BR-07)
+      description: >
+        Admin only. Sets the user's banned flag to true. If the user is an
+        Adopter, all of their Pending adoption applications are automatically
+        changed to Rejected in the same transaction. Previously Approved
+        applications remain unchanged. Every status change is recorded (BR-09).
+      responses:
+        '200':
+          description: User banned and pending applications rejected where applicable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BanUserResult'
+              example:
+                user:
+                  id: 7
+                  fullName: Ayse Yilmaz
+                  email: ayse@example.com
+                  role: ADOPTER
+                  banned: true
+                autoRejectedApplicationIds: [1049, 1052]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /admin/users/{userId}/unban:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    post:
+      tags: [Admin]
+      operationId: unbanUser
+      summary: Unban a user (FR-06)
+      description: >
+        Admin only. Sets the user's banned flag to false. Previously rejected
+        applications are not restored or changed.
+      responses:
+        '200':
+          description: User unbanned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                id: 7
+                fullName: Ayse Yilmaz
+                email: ayse@example.com
+                role: ADOPTER
+                banned: false
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -752,6 +1005,22 @@ components:
         type: integer
         format: int64
       example: 1048
+    ShelterId:
+      in: path
+      name: shelterId
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 12
+    UserId:
+      in: path
+      name: userId
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 7
 
   responses:
     BadRequest:
@@ -794,6 +1063,26 @@ components:
             status: 404
             error: NOT_FOUND
             message: The requested resource was not found.
+    Conflict:
+      description: The requested operation conflicts with the resource's current state
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 409
+            error: CONFLICT
+            message: The requested operation cannot be completed in the current state.
+    UnprocessableContent:
+      description: The request is syntactically valid but fails a business validation rule
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 422
+            error: UNPROCESSABLE_CONTENT
+            message: The request does not meet the required business rules.
 
   schemas:
     # --- Shared ---------------------------------------------------------------
@@ -1065,6 +1354,85 @@ components:
         autoRejectedApplicationIds:
           type: array
           description: Other Pending applications for the same animal that were automatically rejected (BR-02).
+          items:
+            type: integer
+            format: int64
+          example: [1049, 1052]
+
+    # --- Shelter Profiles -----------------------------------------------------
+    ShelterRegistrationStatus:
+      type: string
+      enum: [Pending, Approved, Rejected]
+
+    NewShelterProfile:
+      type: object
+      required: [name, address, contactEmail, phone]
+      properties:
+        name:
+          type: string
+          example: Pati Dostlari Shelter
+        address:
+          type: string
+          example: Ankara, Türkiye
+        contactEmail:
+          type: string
+          format: email
+          example: contact@patidostlari.example
+        phone:
+          type: string
+          example: '+90 312 555 0101'
+        description:
+          type: string
+          example: A local animal shelter.
+
+    ShelterProfileUpdate:
+      type: object
+      description: All fields are optional. Registration status cannot be changed through this schema.
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        contactEmail:
+          type: string
+          format: email
+        phone:
+          type: string
+        description:
+          type: string
+
+    ShelterProfile:
+      allOf:
+        - $ref: '#/components/schemas/NewShelterProfile'
+        - type: object
+          required: [id, ownerUserId, status, createdAt, updatedAt]
+          properties:
+            id:
+              type: integer
+              format: int64
+              example: 12
+            ownerUserId:
+              type: integer
+              format: int64
+              example: 7
+            status:
+              $ref: '#/components/schemas/ShelterRegistrationStatus'
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    BanUserResult:
+      type: object
+      required: [user, autoRejectedApplicationIds]
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        autoRejectedApplicationIds:
+          type: array
+          description: Pending applications automatically rejected when the adopter was banned (BR-07).
           items:
             type: integer
             format: int64
