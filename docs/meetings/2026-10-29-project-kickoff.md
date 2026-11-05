@@ -12,7 +12,7 @@
 
 | Name | Role | Present |
 |---|---|:---:|
-| İlayda Ersin | Product Owner and Requirements Engineer | ✅ |
+| İlayda Erşin | Product Owner and Requirements Engineer | ✅ |
 | Şevval Sıla Çelik | Scrum Master and Agile Process Coach | ✅ |
 | Işıl Gültekin | Lead Software Architect and Technical Lead | ✅ |
 | Efekan Coşkun | Quality Assurance and Test Automation Engineer | ✅ |
