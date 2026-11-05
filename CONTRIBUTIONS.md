@@ -13,18 +13,18 @@
 Every member works with an individual GitHub account. All work below is traceable through issues, pull requests, reviews, and commits.
 Roles and the RACI matrix are defined in [`docs/05-team-raci.md`](docs/05-team-raci.md).
 
-Pull requests without a note are merged into `develop`. Pull requests marked *awaiting merge* or *open* were submitted but not yet merged at the time of writing.
+Pull requests without a note are merged into `develop`. Pull requests marked *open* were submitted but not merged into Sprint 1.
 
 ## Summary
 
 | Name | Student No | GitHub | Role | PRs Merged | PRs Submitted (not merged) | PRs Reviewed |
 |---|---|---|---|---|---|---|
-| İlayda Erşin | 220204051 | [@ilayda-ersin](https://github.com/ilayda-ersin) | Product Owner and Requirements Engineer | #22, #23 | – | – |
-| Şevval Sıla Çelik | 230204014 | [@sevvalsilacelik](https://github.com/sevvalsilacelik) | Scrum Master and Agile Process Coach | #17, #18, #26 | #36 | #5, #7, #31, #33 |
-| Işıl Gültekin | 230204006 | [@gltknisil](https://github.com/gltknisil) | Lead Software Architect and Technical Lead | #5, #7 | – | #2, #8, #9, #16, #17, #18, #22, #23, #27, #36 |
-| Efekan Coşkun | 220201024 | [@VarnaToent0](https://github.com/VarnaToent0) | Quality Assurance and Test Automation Engineer | – | #31, #33, #37 | #25, #36 |
+| İlayda Erşin | 220204051 | [@ilayda-ersin](https://github.com/ilayda-ersin) | Product Owner and Requirements Engineer | #22, #23 | – | #37 |
+| Şevval Sıla Çelik | 230204014 | [@sevvalsilacelik](https://github.com/sevvalsilacelik) | Scrum Master and Agile Process Coach | #17, #18, #26, #36 | – | #5, #7, #31, #33 |
+| Işıl Gültekin | 230204006 | [@gltknisil](https://github.com/gltknisil) | Lead Software Architect and Technical Lead | #5, #7, #42 | – | #2, #8, #9, #16, #17, #18, #22, #23, #27, #36, #43 |
+| Efekan Coşkun | 220201024 | [@VarnaToent0](https://github.com/VarnaToent0) | Quality Assurance and Test Automation Engineer | #31, #33, #37, #43 | – | #25, #36, #42 |
 | Aslınur İlay Tekin | 230204010 | [@aslnurilay](https://github.com/aslnurilay) | DevOps and CI/CD Infrastructure Engineer | #2, #8, #9, #16 | – | #26, #29 |
-| Fatma Nur Kodak | 210201020 | [@fnurkodak](https://github.com/fnurkodak) | Implementation and Integration Engineer | #27 | #29, #25 | – |
+| Fatma Nur Kodak | 210201020 | [@fnurkodak](https://github.com/fnurkodak) | Implementation and Integration Engineer | #27, #29 | #25 | – |
 
 ---
 
@@ -46,6 +46,7 @@ Pull requests without a note are merged into `develop`. Pull requests marked *aw
 
 - **Issues:** [#20](https://github.com/seng321-termproject-pawradise/pawradise/issues/20), [#21](https://github.com/seng321-termproject-pawradise/pawradise/issues/21), [#39](https://github.com/seng321-termproject-pawradise/pawradise/issues/39), [#40](https://github.com/seng321-termproject-pawradise/pawradise/issues/40)
 - **Pull requests:** [#22](https://github.com/seng321-termproject-pawradise/pawradise/pull/22), [#23](https://github.com/seng321-termproject-pawradise/pawradise/pull/23)
+- **Reviews:** [#37](https://github.com/seng321-termproject-pawradise/pawradise/pull/37)
 - **Commits:** [commits by @ilayda-ersin](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=ilayda-ersin)
 
 ---
@@ -70,7 +71,7 @@ Pull requests without a note are merged into `develop`. Pull requests marked *aw
 **Links**
 
 - **Issues:** [#10](https://github.com/seng321-termproject-pawradise/pawradise/issues/10), [#11](https://github.com/seng321-termproject-pawradise/pawradise/issues/11), [#12](https://github.com/seng321-termproject-pawradise/pawradise/issues/12), [#13](https://github.com/seng321-termproject-pawradise/pawradise/issues/13), [#35](https://github.com/seng321-termproject-pawradise/pawradise/issues/35)
-- **Pull requests:** [#17](https://github.com/seng321-termproject-pawradise/pawradise/pull/17), [#18](https://github.com/seng321-termproject-pawradise/pawradise/pull/18), [#26](https://github.com/seng321-termproject-pawradise/pawradise/pull/26), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36) (open)
+- **Pull requests:** [#17](https://github.com/seng321-termproject-pawradise/pawradise/pull/17), [#18](https://github.com/seng321-termproject-pawradise/pawradise/pull/18), [#26](https://github.com/seng321-termproject-pawradise/pawradise/pull/26), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36)
 - **Reviews:** [#5](https://github.com/seng321-termproject-pawradise/pawradise/pull/5), [#7](https://github.com/seng321-termproject-pawradise/pawradise/pull/7), [#31](https://github.com/seng321-termproject-pawradise/pawradise/pull/31), [#33](https://github.com/seng321-termproject-pawradise/pawradise/pull/33)
 - **Commits:** [commits by @sevvalsilacelik](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=sevvalsilacelik)
 
@@ -89,13 +90,14 @@ Pull requests without a note are merged into `develop`. Pull requests marked *aw
 - System Vision and Boundary with the labeled system context diagram, scope, constraints, assumptions, and open issues (`docs/02-vision-boundary.md`).
 - Draft OpenAPI 3.0.3 contract (`api/openapi.yaml`) and main API flows (`docs/03-api-flows.md`).
 - Technical reviews of most Sprint 1 pull requests.
-- Follow-up issue for the admin and shelter endpoints planned for Sprint 2 (#19); assignee of the API findings reported by QA (#38, #41).
+- Follow-up issue for the admin and shelter endpoints planned for Sprint 2 (#19).
+- Fix of the API findings reported by QA: image URL scheme and application response examples (#38, #41, PR #42).
 
 **Links**
 
 - **Issues:** [#4](https://github.com/seng321-termproject-pawradise/pawradise/issues/4), [#6](https://github.com/seng321-termproject-pawradise/pawradise/issues/6), [#19](https://github.com/seng321-termproject-pawradise/pawradise/issues/19), [#38](https://github.com/seng321-termproject-pawradise/pawradise/issues/38), [#41](https://github.com/seng321-termproject-pawradise/pawradise/issues/41)
-- **Pull requests:** [#5](https://github.com/seng321-termproject-pawradise/pawradise/pull/5), [#7](https://github.com/seng321-termproject-pawradise/pawradise/pull/7)
-- **Reviews:** [#2](https://github.com/seng321-termproject-pawradise/pawradise/pull/2), [#8](https://github.com/seng321-termproject-pawradise/pawradise/pull/8), [#9](https://github.com/seng321-termproject-pawradise/pawradise/pull/9), [#16](https://github.com/seng321-termproject-pawradise/pawradise/pull/16), [#17](https://github.com/seng321-termproject-pawradise/pawradise/pull/17), [#18](https://github.com/seng321-termproject-pawradise/pawradise/pull/18), [#22](https://github.com/seng321-termproject-pawradise/pawradise/pull/22), [#23](https://github.com/seng321-termproject-pawradise/pawradise/pull/23), [#27](https://github.com/seng321-termproject-pawradise/pawradise/pull/27), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36)
+- **Pull requests:** [#5](https://github.com/seng321-termproject-pawradise/pawradise/pull/5), [#7](https://github.com/seng321-termproject-pawradise/pawradise/pull/7), [#42](https://github.com/seng321-termproject-pawradise/pawradise/pull/42)
+- **Reviews:** [#2](https://github.com/seng321-termproject-pawradise/pawradise/pull/2), [#8](https://github.com/seng321-termproject-pawradise/pawradise/pull/8), [#9](https://github.com/seng321-termproject-pawradise/pawradise/pull/9), [#16](https://github.com/seng321-termproject-pawradise/pawradise/pull/16), [#17](https://github.com/seng321-termproject-pawradise/pawradise/pull/17), [#18](https://github.com/seng321-termproject-pawradise/pawradise/pull/18), [#22](https://github.com/seng321-termproject-pawradise/pawradise/pull/22), [#23](https://github.com/seng321-termproject-pawradise/pawradise/pull/23), [#27](https://github.com/seng321-termproject-pawradise/pawradise/pull/27), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36), [#43](https://github.com/seng321-termproject-pawradise/pawradise/pull/43)
 - **Commits:** [commits by @gltknisil](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=gltknisil)
 
 ---
@@ -113,15 +115,15 @@ Pull requests without a note are merged into `develop`. Pull requests marked *aw
 - Issue templates with title, description, related FR/epic, acceptance criteria, priority, and assignee fields (#31).
 - Pull request template with summary, related issue, changes, testing/validation, checklist, and reviewer sections (#33).
 - Definition of Done update in the product backlog (#37).
-- Swagger Editor validation of the OpenAPI draft with screenshot evidence, posted in the review of #25.
+- Swagger Editor validation of the OpenAPI contract with screenshot evidence (#43, `docs/evidence/`).
 - QA findings reported as issues: image URL schema validation (#38), handover rejection scenario (#39), documentation inconsistencies (#40), inconsistent response examples (#41).
-- Formal reviews of #25 and #36.
+- Formal reviews of #25, #36, and #42 (fix of the QA findings #38 and #41).
 
 **Links**
 
 - **Issues:** [#30](https://github.com/seng321-termproject-pawradise/pawradise/issues/30), [#32](https://github.com/seng321-termproject-pawradise/pawradise/issues/32), [#34](https://github.com/seng321-termproject-pawradise/pawradise/issues/34), [#38](https://github.com/seng321-termproject-pawradise/pawradise/issues/38), [#39](https://github.com/seng321-termproject-pawradise/pawradise/issues/39), [#40](https://github.com/seng321-termproject-pawradise/pawradise/issues/40), [#41](https://github.com/seng321-termproject-pawradise/pawradise/issues/41)
-- **Pull requests:** [#31](https://github.com/seng321-termproject-pawradise/pawradise/pull/31) (awaiting merge), [#33](https://github.com/seng321-termproject-pawradise/pawradise/pull/33) (awaiting merge), [#37](https://github.com/seng321-termproject-pawradise/pawradise/pull/37) (awaiting merge)
-- **Reviews:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36)
+- **Pull requests:** [#31](https://github.com/seng321-termproject-pawradise/pawradise/pull/31), [#33](https://github.com/seng321-termproject-pawradise/pawradise/pull/33), [#37](https://github.com/seng321-termproject-pawradise/pawradise/pull/37), [#43](https://github.com/seng321-termproject-pawradise/pawradise/pull/43)
+- **Reviews:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36), [#42](https://github.com/seng321-termproject-pawradise/pawradise/pull/42)
 - **Commits:** [commits by @VarnaToent0](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=VarnaToent0)
 
 ---
@@ -162,10 +164,10 @@ Pull requests without a note are merged into `develop`. Pull requests marked *aw
 
 - FR → User Story → API traceability table in the product backlog (`docs/04-backlog.md`, Section 9).
 - Project README with description, features, roles, business rules, proposed technology stack, and documentation index (#29, replaces #24).
-- Draft of the admin and shelter profile endpoints for the OpenAPI contract (#25, planned for Sprint 2, #19).
+- Draft of the admin and shelter profile endpoints for the OpenAPI contract (#25, open; planned for Sprint 2, #19).
 
 **Links**
 
 - **Issues:** [#28](https://github.com/seng321-termproject-pawradise/pawradise/issues/28)
-- **Pull requests:** [#27](https://github.com/seng321-termproject-pawradise/pawradise/pull/27), [#29](https://github.com/seng321-termproject-pawradise/pawradise/pull/29) (awaiting merge), [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25) (open)
+- **Pull requests:** [#27](https://github.com/seng321-termproject-pawradise/pawradise/pull/27), [#29](https://github.com/seng321-termproject-pawradise/pawradise/pull/29), [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25) (open)
 - **Commits:** [commits by @fnurkodak](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=fnurkodak)

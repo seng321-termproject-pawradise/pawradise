@@ -44,7 +44,7 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 - Facilitates sprint planning, stand-ups, and retrospectives, and records meeting minutes in `docs/meetings/`.
 - Maintains the RACI matrix and the contribution guidelines (`CONTRIBUTING.md`).
 - Administers the GitHub Projects board and tracks team progress.
-- Tracks and removes impediments in `docs/sprint-1-tracking.md`.
+- Tracks and removes impediments through the GitHub Projects board and the meeting minutes in `docs/meetings/`.
 - Monitors the individual contribution requirement (2 pull requests authored, 2 reviewed per member per sprint).
 - Prepares sprint releases and submission documents.
 
@@ -137,8 +137,8 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 | 5 | Contribution Guidelines and Git-Flow Rules | SM | SM | `CONTRIBUTING.md` | #3, #12 |
 | 6 | GitHub Organization, Repository, and Branch Protection | DEVOPS | DEVOPS | Repository settings | #1 |
 | 7 | Initial Product Backlog | PO | PO | GitHub Projects board, `docs/04-backlog.md` | #21 |
-| 8 | Review of acceptance criteria and API for testability | QA | QA | Pull request reviews | `#<n>` |
-| 9 | Sprint 1 Submission Document and Release | SM | SM | `docs/sprint-1-submission.md`, tag `sprint-1` | #13 |
+| 8 | Review of acceptance criteria and API for testability | QA | QA | Pull request reviews and QA issues | #38, #39, #40, #41 |
+| 9 | Individual Contributions, Sprint 1 Release, and Submission | SM | SM | `CONTRIBUTIONS.md`, tag `sprint-1` | #13, #35 |
 
 ## 6. Approval
 
