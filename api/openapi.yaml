@@ -1,0 +1,1158 @@
+openapi: 3.0.3
+
+info:
+  title: pawradise - Animal Shelter & Adoption System API
+  version: 0.1.1
+  contact:
+    name: Pawradise Team (SENG 321)
+    url: https://github.com/seng321-termproject-pawradise/pawradise
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  description: >
+    Initial OpenAPI specification (Sprint 1 draft) for the SENG 321
+    Animal Shelter & Adoption System project.
+
+
+    Scope of this draft: Authentication, Animals, Applications, and
+    Application Approval. Admin shelter-registration, user-ban, and
+    shelter-profile endpoints (FR-03, FR-04, FR-06, FR-07) will be added
+    in a later version. The agreed ban behavior (Pending applications of
+    a banned adopter are automatically rejected, BR-07) is documented in
+    docs/03-api-flows.md (F8) for the future ban endpoint.
+
+
+    Requirement IDs (FR, NFR, BR) refer to the Official Requirements
+    Reference for Sprint 1. All error responses use the shared error body
+    defined in `ErrorResponse`.
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server (to be confirmed by the team)
+
+tags:
+  - name: Authentication
+    description: Registration, login, and logout (FR-01, FR-02)
+  - name: Animals
+    description: Animal listings, search, archiving, handover, and status history
+  - name: Applications
+    description: Adoption application submission, tracking, and withdrawal
+  - name: Application Approval
+    description: Approval and rejection of adoption applications by shelter owners
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ---------------------------------------------------------------------------
+  # Authentication
+  # ---------------------------------------------------------------------------
+  /auth/register:
+    post:
+      tags: [Authentication]
+      operationId: registerUser
+      summary: Register a new user (FR-01)
+      description: >
+        Creates an Adopter or Shelter Owner account. Admin accounts are not
+        created through public registration (Assumption A-03). Passwords are
+        stored using a secure hashing algorithm (NFR-02).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                id: 7
+                fullName: Ayse Yilmaz
+                email: ayse@example.com
+                role: ADOPTER
+                banned: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Email address is already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: CONFLICT
+                message: This email address is already registered.
+
+  /auth/login:
+    post:
+      tags: [Authentication]
+      operationId: loginUser
+      summary: Log in and receive an access token (FR-01)
+      description: >
+        Authenticates a user with email and password and returns a JWT
+        bearer token. The token is required for all other operations
+        except registration.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              example:
+                accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3Iiwicm9sZSI6IkFET1BURVIifQ.signature
+                tokenType: Bearer
+                expiresIn: 3600
+                user:
+                  id: 7
+                  fullName: Ayse Yilmaz
+                  email: ayse@example.com
+                  role: ADOPTER
+                  banned: false
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 401
+                error: UNAUTHORIZED
+                message: Invalid email or password.
+
+  /auth/logout:
+    post:
+      tags: [Authentication]
+      operationId: logoutUser
+      summary: Log out the current user (FR-01)
+      description: Ends the current user's session. Requires a valid bearer token.
+      responses:
+        '204':
+          description: Logout successful
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # Animals
+  # ---------------------------------------------------------------------------
+  /animals:
+    get:
+      tags: [Animals]
+      operationId: listAnimals
+      summary: List and filter animals (FR-13, FR-14)
+      description: >
+        Returns animal listings. By default only animals with status
+        Available are returned. Animals can be filtered by species and age.
+      parameters:
+        - in: query
+          name: species
+          required: false
+          schema:
+            type: string
+          example: Dog
+        - in: query
+          name: minAge
+          required: false
+          description: Minimum age in years (inclusive)
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: maxAge
+          required: false
+          description: Maximum age in years (inclusive)
+          schema:
+            type: integer
+            minimum: 0
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/AnimalStatus'
+      responses:
+        '200':
+          description: Matching animals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Animal'
+              example:
+                - id: 42
+                  shelterId: 3
+                  name: Pamuk
+                  species: Dog
+                  breed: Golden Retriever
+                  ageYears: 2
+                  gender: Female
+                  description: Friendly and vaccinated.
+                  imageUrls:
+                    - https://images.example.com/animals/pamuk-1.jpg
+                  status: Available
+                  ownerAdopterId: null
+                  createdAt: '2026-11-01T09:00:00Z'
+                  updatedAt: '2026-11-01T09:00:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Animals]
+      operationId: createAnimal
+      summary: Add an animal listing (FR-08)
+      description: >
+        Shelter Owner only. Images are provided as HTTP or HTTPS image URLs;
+        other schemes (for example `ftp://`) are rejected with 400. Direct file
+        upload is out of scope. A new listing starts with status Available.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAnimal'
+      responses:
+        '201':
+          description: Animal listing created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /animals/{animalId}:
+    parameters:
+      - $ref: '#/components/parameters/AnimalId'
+    get:
+      tags: [Animals]
+      operationId: getAnimal
+      summary: View detailed animal information (FR-15)
+      description: Returns all information of one animal listing, including its current status and image URLs.
+      responses:
+        '200':
+          description: Animal details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Animals]
+      operationId: updateAnimal
+      summary: Update an animal listing (FR-09)
+      description: >
+        Shelter Owner only, for animals of their own shelter. The status
+        cannot be changed through this operation; status changes use the
+        dedicated archive and handover operations.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnimalUpdate'
+      responses:
+        '200':
+          description: Animal listing updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /animals/{animalId}/archive:
+    parameters:
+      - $ref: '#/components/parameters/AnimalId'
+    post:
+      tags: [Animals]
+      operationId: archiveAnimal
+      summary: Archive an animal listing (FR-05, FR-09)
+      description: >
+        Shelter Owner (own listings) or Admin (inappropriate listings).
+        Allowed transition: Available -> Archived. Listings are archived
+        instead of permanently deleted. The change is recorded in the
+        status history (BR-09).
+      responses:
+        '200':
+          description: Animal listing archived
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The animal is not in Available status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: CONFLICT
+                message: Only animals with status Available can be archived.
+
+  /animals/{animalId}/handover:
+    parameters:
+      - $ref: '#/components/parameters/AnimalId'
+    post:
+      tags: [Animals]
+      operationId: recordHandover
+      summary: Record the completed handover (FR-12, BR-04)
+      description: >
+        Shelter Owner only. Allowed transition: Reserved -> Adopted. The
+        adopter of the approved application becomes the owner of the
+        animal, and the status change is recorded (BR-09).
+      responses:
+        '200':
+          description: Handover recorded; the animal is now Adopted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Animal'
+              example:
+                id: 42
+                shelterId: 3
+                name: Pamuk
+                species: Dog
+                breed: Golden Retriever
+                ageYears: 2
+                gender: Female
+                description: Friendly and vaccinated.
+                imageUrls:
+                  - https://images.example.com/animals/pamuk-1.jpg
+                status: Adopted
+                ownerAdopterId: 7
+                createdAt: '2026-11-01T09:00:00Z'
+                updatedAt: '2026-11-15T11:00:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The animal is not in Reserved status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: CONFLICT
+                message: Handover can only be recorded for a Reserved animal.
+
+  /animals/{animalId}/status-history:
+    parameters:
+      - $ref: '#/components/parameters/AnimalId'
+    get:
+      tags: [Animals]
+      operationId: getAnimalStatusHistory
+      summary: View the status history of an animal (FR-21, BR-09)
+      description: >
+        Returns every recorded status change of the animal with the
+        responsible user ID, previous status, new status, and timestamp.
+        Available to the Shelter Owner of the animal and to Admins.
+      responses:
+        '200':
+          description: Status changes, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusChange'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Applications
+  # ---------------------------------------------------------------------------
+  /applications:
+    post:
+      tags: [Applications]
+      operationId: submitApplication
+      summary: Submit an adoption application (FR-16)
+      description: >
+        Adopter only. Multiple adopters can apply for the same animal, and
+        an adopter can apply for multiple animals. Banned users cannot
+        apply (BR-07). An apartment permission document is required when
+        the adopter lives in an apartment and the animal is a dog (BR-06).
+        A new application starts with status Pending.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewApplication'
+      responses:
+        '201':
+          description: Application successfully submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              example:
+                id: 1048
+                animalId: 42
+                adopterId: 7
+                livesInApartment: true
+                documents:
+                  - type: APARTMENT_PERMISSION
+                    url: https://docs.example.com/ayse/apartment-permission.pdf
+                note: I have experience with dogs.
+                status: Pending
+                createdAt: '2026-11-10T10:15:00Z'
+                updatedAt: '2026-11-10T10:15:00Z'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: The user is banned or is not an Adopter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 403
+                error: FORBIDDEN
+                message: Banned users cannot submit adoption applications.
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The animal is not available for adoption
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: CONFLICT
+                message: This animal is not available for adoption.
+        '422':
+          description: A mandatory document is missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 422
+                error: UNPROCESSABLE_CONTENT
+                message: An apartment permission document is required to adopt a dog.
+
+    get:
+      tags: [Applications]
+      operationId: listApplications
+      summary: List adoption applications (FR-10, FR-17)
+      description: >
+        Adopters see only their own applications. Shelter Owners see only
+        the applications for animals of their own shelter.
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            $ref: '#/components/schemas/ApplicationStatus'
+        - in: query
+          name: animalId
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Applications visible to the current user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Application'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /applications/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    get:
+      tags: [Applications]
+      operationId: getApplication
+      summary: View an application with its status history (FR-17, FR-21)
+      description: >
+        Returns one application with its full status history. Adopters can
+        view only their own applications; Shelter Owners can view only the
+        applications for animals of their own shelter.
+      responses:
+        '200':
+          description: Application details including status history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationDetail'
+              example:
+                id: 1048
+                animalId: 42
+                adopterId: 7
+                livesInApartment: true
+                documents:
+                  - type: APARTMENT_PERMISSION
+                    url: https://docs.example.com/ayse/apartment-permission.pdf
+                note: I have experience with dogs.
+                status: Approved
+                createdAt: '2026-11-10T10:15:00Z'
+                updatedAt: '2026-11-12T14:30:00Z'
+                statusHistory:
+                  - id: 500
+                    entityType: APPLICATION
+                    entityId: 1048
+                    previousStatus: null
+                    newStatus: Pending
+                    changedBy: 7
+                    changedAt: '2026-11-10T10:15:00Z'
+                  - id: 501
+                    entityType: APPLICATION
+                    entityId: 1048
+                    previousStatus: Pending
+                    newStatus: Approved
+                    changedBy: 3
+                    changedAt: '2026-11-12T14:30:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /applications/{applicationId}/withdraw:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Applications]
+      operationId: withdrawApplication
+      summary: Withdraw a pending application (FR-18, BR-03)
+      description: >
+        Adopter only, for their own applications. Allowed transition:
+        Pending -> Withdrawn. Approved, Rejected, or already Withdrawn
+        applications cannot be withdrawn.
+      responses:
+        '200':
+          description: Application withdrawn
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              example:
+                id: 1049
+                animalId: 42
+                adopterId: 8
+                livesInApartment: false
+                documents: []
+                status: Withdrawn
+                createdAt: '2026-11-10T11:00:00Z'
+                updatedAt: '2026-11-11T09:20:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The application is not in Pending status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: CONFLICT
+                message: Only applications with status Pending can be withdrawn.
+
+  # ---------------------------------------------------------------------------
+  # Application Approval
+  # ---------------------------------------------------------------------------
+  /applications/{applicationId}/approve:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Application Approval]
+      operationId: approveApplication
+      summary: Approve an adoption application (FR-11, FR-19, FR-20)
+      description: >
+        Shelter Owner only, for animals of their own shelter. In a single
+        database transaction the system:
+
+        1. checks that the application is Pending and the animal is Available;
+
+        2. checks eligibility: required documents (BR-05), apartment
+        permission (BR-06), and the adoption limit (BR-08): the adopter's
+        animals with status Reserved or Adopted must not exceed three after
+        this approval; Available and Archived animals do not count;
+
+        3. sets the application to Approved and the animal to Reserved (BR-01);
+
+        4. sets all other Pending applications for the same animal to
+        Rejected (FR-19, BR-02);
+
+        5. records every status change (BR-09).
+
+
+        If two approval requests for the same animal arrive at the same
+        time, only one succeeds; the other returns 409 Conflict (NFR-08).
+        The adoption limit must also hold when approvals for different
+        animals of the same adopter run at the same time (Scenario 6), so
+        approvals are also serialized per adopter (see docs/03-api-flows.md, F4).
+      responses:
+        '200':
+          description: Application approved; the animal is now Reserved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalResult'
+              example:
+                application:
+                  id: 1048
+                  animalId: 42
+                  adopterId: 7
+                  livesInApartment: true
+                  documents:
+                    - type: APARTMENT_PERMISSION
+                      url: https://docs.example.com/ayse/apartment-permission.pdf
+                  note: I have experience with dogs.
+                  status: Approved
+                  createdAt: '2026-11-10T10:15:00Z'
+                  updatedAt: '2026-11-12T14:30:00Z'
+                animal:
+                  id: 42
+                  shelterId: 3
+                  name: Pamuk
+                  species: Dog
+                  breed: Golden Retriever
+                  ageYears: 2
+                  gender: Female
+                  description: Friendly and vaccinated.
+                  imageUrls:
+                    - https://images.example.com/animals/pamuk-1.jpg
+                  status: Reserved
+                  ownerAdopterId: null
+                  createdAt: '2026-11-01T09:00:00Z'
+                  updatedAt: '2026-11-12T14:30:00Z'
+                autoRejectedApplicationIds: [1049, 1052]
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: >
+            The animal is already reserved, the application is no longer
+            Pending (for example, it was automatically rejected because the
+            adopter was banned), or a concurrent approval for the same animal
+            succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                animalAlreadyReserved:
+                  summary: Another application was already approved
+                  value:
+                    status: 409
+                    error: CONFLICT
+                    message: This animal has already been reserved.
+                applicationNotPending:
+                  summary: The application is not Pending
+                  value:
+                    status: 409
+                    error: CONFLICT
+                    message: Only applications with status Pending can be approved.
+        '422':
+          description: The adopter does not meet the eligibility requirements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingDocument:
+                  summary: A mandatory document is missing (BR-05, BR-06)
+                  value:
+                    status: 422
+                    error: UNPROCESSABLE_CONTENT
+                    message: A mandatory document is missing for this application.
+                adoptionLimitReached:
+                  summary: The adopter already has three animals in Reserved or Adopted status (BR-08)
+                  value:
+                    status: 422
+                    error: UNPROCESSABLE_CONTENT
+                    message: The adopter already has three animals in Reserved or Adopted status.
+
+  /applications/{applicationId}/reject:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags: [Application Approval]
+      operationId: rejectApplication
+      summary: Reject an adoption application (FR-11)
+      description: >
+        Shelter Owner only, for animals of their own shelter. Allowed
+        transition: Pending -> Rejected. The change is recorded (BR-09).
+      responses:
+        '200':
+          description: Application rejected
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+              example:
+                id: 1052
+                animalId: 42
+                adopterId: 9
+                livesInApartment: true
+                documents:
+                  - type: APARTMENT_PERMISSION
+                    url: https://docs.example.com/mert/apartment-permission.pdf
+                status: Rejected
+                createdAt: '2026-11-10T12:30:00Z'
+                updatedAt: '2026-11-11T16:45:00Z'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The application is not in Pending status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                status: 409
+                error: CONFLICT
+                message: Only applications with status Pending can be rejected.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Access token returned by /auth/login. Role-based access control is
+        applied to every operation (FR-02, NFR-03).
+
+  parameters:
+    AnimalId:
+      in: path
+      name: animalId
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 42
+    ApplicationId:
+      in: path
+      name: applicationId
+      required: true
+      schema:
+        type: integer
+        format: int64
+      example: 1048
+
+  responses:
+    BadRequest:
+      description: Invalid request format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 400
+            error: BAD_REQUEST
+            message: The request body is invalid.
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 401
+            error: UNAUTHORIZED
+            message: Authentication is required.
+    Forbidden:
+      description: Insufficient permissions or banned user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 403
+            error: FORBIDDEN
+            message: You do not have permission to perform this operation.
+    NotFound:
+      description: Animal or application does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            status: 404
+            error: NOT_FOUND
+            message: The requested resource was not found.
+
+  schemas:
+    # --- Shared ---------------------------------------------------------------
+    ErrorResponse:
+      type: object
+      required: [status, error, message]
+      properties:
+        status:
+          type: integer
+          example: 409
+        error:
+          type: string
+          example: CONFLICT
+        message:
+          type: string
+          example: This animal has already been reserved.
+
+    UserRole:
+      type: string
+      enum: [ADMIN, SHELTER_OWNER, ADOPTER]
+
+    AnimalStatus:
+      type: string
+      enum: [Available, Reserved, Adopted, Archived]
+
+    ApplicationStatus:
+      type: string
+      enum: [Pending, Approved, Rejected, Withdrawn]
+
+    # --- Authentication -------------------------------------------------------
+    RegisterRequest:
+      type: object
+      required: [fullName, email, password, role]
+      properties:
+        fullName:
+          type: string
+          example: Ayse Yilmaz
+        email:
+          type: string
+          format: email
+          example: ayse@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: S3curePass!
+        role:
+          type: string
+          description: Public registration is available for Adopter and Shelter Owner only.
+          enum: [SHELTER_OWNER, ADOPTER]
+          example: ADOPTER
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: ayse@example.com
+        password:
+          type: string
+          format: password
+          example: S3curePass!
+
+    LoginResponse:
+      type: object
+      required: [accessToken, tokenType, user]
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          description: Token lifetime in seconds
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      required: [id, fullName, email, role, banned]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 7
+        fullName:
+          type: string
+          example: Ayse Yilmaz
+        email:
+          type: string
+          format: email
+          example: ayse@example.com
+        role:
+          $ref: '#/components/schemas/UserRole'
+        banned:
+          type: boolean
+          example: false
+
+    # --- Animals --------------------------------------------------------------
+    NewAnimal:
+      type: object
+      required: [name, species, ageYears, imageUrls]
+      properties:
+        name:
+          type: string
+          example: Pamuk
+        species:
+          type: string
+          description: Supported species are to be confirmed by the team (Open Issue OI-05).
+          example: Dog
+        breed:
+          type: string
+          example: Golden Retriever
+        ageYears:
+          type: integer
+          minimum: 0
+          example: 2
+        gender:
+          type: string
+          example: Female
+        description:
+          type: string
+          example: Friendly and vaccinated.
+        imageUrls:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uri
+            pattern: '^https?://'
+            description: Must be an HTTP or HTTPS URL (US-07).
+          example: ["https://images.example.com/animals/pamuk-1.jpg"]
+
+    AnimalUpdate:
+      type: object
+      description: All fields are optional. Status cannot be changed here.
+      properties:
+        name:
+          type: string
+        species:
+          type: string
+        breed:
+          type: string
+        ageYears:
+          type: integer
+          minimum: 0
+        gender:
+          type: string
+        description:
+          type: string
+        imageUrls:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uri
+            pattern: '^https?://'
+            description: Must be an HTTP or HTTPS URL (US-07).
+
+    Animal:
+      allOf:
+        - $ref: '#/components/schemas/NewAnimal'
+        - type: object
+          required: [id, shelterId, status, createdAt, updatedAt]
+          properties:
+            id:
+              type: integer
+              format: int64
+              example: 42
+            shelterId:
+              type: integer
+              format: int64
+              example: 3
+            status:
+              $ref: '#/components/schemas/AnimalStatus'
+            ownerAdopterId:
+              type: integer
+              format: int64
+              nullable: true
+              description: Set after the handover is recorded (status Adopted).
+              example: null
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    # --- Applications ---------------------------------------------------------
+    ApplicationDocument:
+      type: object
+      description: >
+        Documents are submitted as links because direct file upload is out
+        of scope (Assumption A-06). The list of mandatory document types is
+        to be confirmed by the team.
+      required: [type, url]
+      properties:
+        type:
+          type: string
+          example: APARTMENT_PERMISSION
+        url:
+          type: string
+          format: uri
+          example: https://docs.example.com/ayse/apartment-permission.pdf
+
+    NewApplication:
+      type: object
+      required: [animalId, livesInApartment, documents]
+      properties:
+        animalId:
+          type: integer
+          format: int64
+          example: 42
+        livesInApartment:
+          type: boolean
+          description: Used to apply BR-06 (Assumption A-05).
+          example: true
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationDocument'
+        note:
+          type: string
+          example: I have a garden and experience with dogs.
+
+    Application:
+      allOf:
+        - $ref: '#/components/schemas/NewApplication'
+        - type: object
+          required: [id, adopterId, status, createdAt, updatedAt]
+          properties:
+            id:
+              type: integer
+              format: int64
+              example: 1048
+            adopterId:
+              type: integer
+              format: int64
+              example: 7
+            status:
+              $ref: '#/components/schemas/ApplicationStatus'
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    ApplicationDetail:
+      allOf:
+        - $ref: '#/components/schemas/Application'
+        - type: object
+          required: [statusHistory]
+          properties:
+            statusHistory:
+              type: array
+              items:
+                $ref: '#/components/schemas/StatusChange'
+
+    ApprovalResult:
+      type: object
+      required: [application, animal, autoRejectedApplicationIds]
+      properties:
+        application:
+          $ref: '#/components/schemas/Application'
+        animal:
+          $ref: '#/components/schemas/Animal'
+        autoRejectedApplicationIds:
+          type: array
+          description: Other Pending applications for the same animal that were automatically rejected (BR-02).
+          items:
+            type: integer
+            format: int64
+          example: [1049, 1052]
+
+    StatusChange:
+      type: object
+      description: One recorded status change (BR-09, NFR-09).
+      required: [id, entityType, entityId, previousStatus, newStatus, changedBy, changedAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 501
+        entityType:
+          type: string
+          enum: [ANIMAL, APPLICATION]
+          example: APPLICATION
+        entityId:
+          type: integer
+          format: int64
+          example: 1048
+        previousStatus:
+          type: string
+          nullable: true
+          description: Null for the first status of a record.
+          example: Pending
+        newStatus:
+          type: string
+          example: Approved
+        changedBy:
+          type: integer
+          format: int64
+          description: ID of the responsible user.
+          example: 3
+        changedAt:
+          type: string
+          format: date-time
+          example: '2026-11-10T14:30:00Z'
