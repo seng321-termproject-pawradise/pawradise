@@ -108,7 +108,7 @@ pawradise/
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── api/
 │   └── openapi.yaml
-├──docs/
+├── docs/
 │   ├── meetings/
 │   ├── evidence/
 │   ├── 01-proposal.md
@@ -117,6 +117,7 @@ pawradise/
 │   ├── 04-backlog.md
 │   └── 05-team-raci.md
 ├── CONTRIBUTING.md
+├── CONTRIBUTIONS.md
 ├── LICENSE
 └── README.md
 ```
@@ -159,6 +160,9 @@ Detailed installation, configuration, and execution instructions will be provide
 | `docs/05-team-raci.md` | Team Roles and RACI Matrix |
 | `api/openapi.yaml` | API Specification |
 | `CONTRIBUTING.md` | Contribution Guidelines |
+| `CONTRIBUTIONS.md` | Individual Contributions and Sprint 1 Submission |
+| `docs/meetings/` | Meeting Minutes and Sprint 1 Decision Log |
+| `docs/evidence/` | Branch Protection and Swagger Editor Evidence |
 
 ## 11. License
 
