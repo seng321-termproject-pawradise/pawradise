@@ -145,9 +145,9 @@ Evidence: test matrix and redacted test results.
 
 ### Open decisions
 
-The team must confirm the proposed 30-minute lifetime and choose
-whether expiration requires re-login or a refresh-token flow.
-This draft does not introduce a refresh endpoint.
+The team must confirm the proposed 30-minute access-token lifetime.
+Refresh tokens are not supported. After the access token expires,
+the user must log in again to obtain a new access token.
 
 After agreement, align configuration, API expiresIn examples, and
 documentation. A 30-minute token corresponds to 1,800 seconds.
@@ -227,7 +227,6 @@ Evidence: deployment checklist and results from both operating systems.
 - Confirm performance load, reference hardware, and page-test conditions.
 - Confirm bcrypt work factor.
 - Confirm access-token lifetime and clock tolerance.
-- Decide refresh-token versus re-login behavior.
 - Confirm supported deployment environments.
 - Confirm the proposed NFR-10 identifier.
 - Identify the purpose of any APP_KEY setting before defining its
