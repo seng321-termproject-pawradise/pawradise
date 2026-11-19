@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 1.0 |
+| Version | 1.1 |
 | Status | Ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
@@ -184,7 +184,7 @@ flowchart TB
 | Element | Type | Responsibility | Related FR |
 |---|---|---|---|
 | Admin | Person | Reviews shelter registration requests, archives inappropriate listings, bans and unbans users. Admin accounts are seeded, not publicly registered (A-03). | FR-03 – FR-06 |
-| Shelter Owner | Person | Submits and maintains the shelter profile; after approval, manages listings, reviews and decides applications, records handovers. | FR-03, FR-07 – FR-12, FR-19, FR-20 |
+| Shelter Owner | Person | Submits and maintains the shelter profile; after approval, manages listings, reviews and decides applications, records handovers. | FR-07 – FR-12 |
 | Adopter | Person | Browses and filters animals, submits, tracks and withdraws applications. | FR-13 – FR-18 |
 | Pawradise | Software system | Enforces all business rules (BR-01 – BR-09) and stores all data, including the URLs of images and documents. | FR-01 – FR-21 |
 | External Hosting | External system | Hosts image and document files. Pawradise never uploads, downloads or proxies these files; the user's browser opens the stored URLs directly. | FR-05, FR-08, FR-11, FR-13 – FR-16 |
@@ -305,13 +305,13 @@ flowchart TB
 
 | Component | Layer | Responsibility | OpenAPI operations | FR |
 |---|---|---|---|---|
-| Auth Router | Router | Registration, login and logout endpoints | `registerUser`, `loginUser`, `logoutUser` | FR-01, FR-02 |
+| Auth Router | Router | Registration, login and logout endpoints | `registerUser`, `loginUser`, `logoutUser` | FR-01 |
 | Animals Router | Router | Animal listing, detail, create, update, archive, handover and status history endpoints | `listAnimals`, `getAnimal`, `createAnimal`, `updateAnimal`, `archiveAnimal`, `recordHandover`, `getAnimalStatusHistory` | FR-05, FR-08, FR-09, FR-12 – FR-15, FR-21 |
 | Applications Router | Router | Application endpoints for adopters and shelter owners | `submitApplication`, `listApplications`, `getApplication`, `withdrawApplication`, `approveApplication`, `rejectApplication` | FR-10, FR-11, FR-16 – FR-20 |
-| Shelters Router | Router | Shelter profile endpoints of the current shelter owner | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` | FR-03, FR-07 |
+| Shelters Router | Router | Shelter profile endpoints of the current shelter owner | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` | FR-07 |
 | Admin Router | Router | Shelter registration review and user management endpoints (Admin only) | `listShelterRegistrationRequests`, `approveShelterRegistration`, `rejectShelterRegistration`, `listUsers` (being added in PR #25), `banUser`, `unbanUser` | FR-03, FR-04, FR-06 |
 | Security Dependencies | Cross-cutting | Verifies the JWT, loads the current user, checks the role, rejects banned users where required (BR-07) and requires an Approved shelter profile for shelter operations (K2). Returns 401 or 403. | All protected operations | FR-02, NFR-03 |
-| Auth Service | Service | Creates users with bcrypt password hashes, verifies credentials, issues 30-minute JWT access tokens | – | FR-01, FR-02, NFR-02 |
+| Auth Service | Service | Creates users with bcrypt password hashes, verifies credentials, issues 30-minute JWT access tokens | – | FR-01, NFR-02 |
 | Animal Service | Service | Creates and updates listings, archives listings (owner or Admin), records handover (Reserved → Adopted, sets `ownerAdopterId`) | – | FR-05, FR-08, FR-09, FR-12 – FR-15 |
 | Application Service | Service | Submits and withdraws applications; approves with row locking (ADR-04), document and BR-08 checks and auto-rejection of competing applications; rejects applications | – | FR-10, FR-11, FR-16 – FR-20 |
 | Shelter Service | Service | Creates and updates shelter profiles; approves or rejects registration requests | – | FR-03, FR-04, FR-07 |
@@ -468,7 +468,7 @@ Fields marked with `?` are optional (nullable).
 | Animal | Animal listing of a shelter, with its current status and, after handover, its adopter. | FR-05, FR-08, FR-09, FR-12 – FR-15 |
 | AnimalImage | One public image URL of an animal. | FR-08 |
 | Application | Adoption application of an adopter for one animal. | FR-10, FR-11, FR-16 – FR-20 |
-| ApplicationDocument | One document link (type and URL) submitted with an application. | FR-11, FR-16 |
+| ApplicationDocument | One document link (type and URL) submitted with an application. | FR-11, FR-16, FR-20 |
 | AnimalStatusHistory | Immutable record of one animal status change. | FR-21 |
 | ApplicationStatusHistory | Immutable record of one application status change. | FR-21 |
 
@@ -628,8 +628,8 @@ InnoDB creates an index for every primary key, unique key and foreign key. The f
 | Index | Supports |
 |---|---|
 | `animals (status, species, age_years)` | Browsing and filtering available animals (FR-13, FR-14, NFR-01) |
-| `applications (animal_id, status)` | Listing applications of an animal and auto-rejecting competing Pending applications (FR-10, BR-02) |
-| `applications (adopter_id, status)` | Listing an adopter's applications and counting Approved applications for BR-08 (FR-17, FR-19) |
+| `applications (animal_id, status)` | Listing applications of an animal and auto-rejecting competing Pending applications (FR-10, FR-19, BR-02) |
+| `applications (adopter_id, status)` | Listing an adopter's applications and counting Approved applications for BR-08 (FR-17, FR-20) |
 
 ---
 
@@ -768,7 +768,7 @@ Status values are stored as enumerations (Section 7.2). Every transition is trig
 stateDiagram-v2
     direction LR
     [*] --> Available: createAnimal (FR-08)
-    Available --> Reserved: approveApplication (FR-19, BR-02, BR-04)
+    Available --> Reserved: approveApplication (FR-11, BR-02, BR-04)
     Reserved --> Adopted: recordHandover (FR-12, sets ownerAdopterId)
     Available --> Archived: archiveAnimal (FR-05, FR-09)
     Adopted --> [*]
@@ -790,9 +790,9 @@ Adopted and Archived are final states. Reserved and Adopted animals cannot be ar
 stateDiagram-v2
     direction LR
     [*] --> Pending: submitApplication (FR-16)
-    Pending --> Approved: approveApplication (FR-19)
-    Pending --> Rejected: rejectApplication (FR-20)
-    Pending --> Rejected: automatic – another application approved (BR-02)
+    Pending --> Approved: approveApplication (FR-11, FR-20)
+    Pending --> Rejected: rejectApplication (FR-11)
+    Pending --> Rejected: automatic – another application approved (FR-19, BR-02)
     Pending --> Rejected: automatic – adopter banned (BR-07)
     Pending --> Withdrawn: withdrawApplication (FR-18, BR-03)
     Approved --> [*]
@@ -816,7 +816,7 @@ Only Pending applications can change status; Approved, Rejected and Withdrawn ar
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> Pending: createShelterProfile (FR-03)
+    [*] --> Pending: createShelterProfile (FR-07)
     Pending --> Approved: approveShelterRegistration (FR-04)
     Pending --> Rejected: rejectShelterRegistration (FR-04)
     Approved --> [*]
@@ -892,33 +892,33 @@ flowchart LR
 
 ### 11.1 Functional Requirements → Components
 
-Each functional requirement of `docs/07-srs.md` is implemented by the components below (Section 5) and stored in the listed tables (Section 7).
+Each functional requirement (official list FR-01 – FR-21, see `docs/02-vision-boundary.md` Section 5 and `docs/07-srs.md`) is implemented by the components below (Section 5) and stored in the listed tables (Section 7).
 
 | FR | Requirement | Router | Service | OpenAPI operations | Tables |
 |---|---|---|---|---|---|
-| FR-01 | User registration | Auth Router | Auth Service | `registerUser` | `users` |
-| FR-02 | Login and logout | Auth Router, Security Dependencies | Auth Service | `loginUser`, `logoutUser` | `users` |
-| FR-03 | Shelter registration request and review | Shelters Router, Admin Router | Shelter Service | `createShelterProfile`, `listShelterRegistrationRequests` | `shelter_profiles` |
-| FR-04 | Approve or reject shelter registration | Admin Router | Shelter Service | `approveShelterRegistration`, `rejectShelterRegistration` | `shelter_profiles` |
-| FR-05 | Admin listing moderation | Animals Router | Animal Service, History Service | `archiveAnimal` | `animals`, `animal_status_history` |
-| FR-06 | Ban and unban users (BR-07) | Admin Router | User Service, Application Service, History Service | `listUsers`, `banUser`, `unbanUser` | `users`, `applications`, `application_status_history` |
-| FR-07 | Shelter profile management | Shelters Router | Shelter Service | `getMyShelterProfile`, `updateMyShelterProfile` | `shelter_profiles` |
-| FR-08 | Create animal listing | Animals Router | Animal Service, History Service | `createAnimal` | `animals`, `animal_images`, `animal_status_history` |
-| FR-09 | Update and archive listing | Animals Router | Animal Service, History Service | `updateAnimal`, `archiveAnimal` | `animals`, `animal_images`, `animal_status_history` |
-| FR-10 | View shelter applications | Applications Router | Application Service | `listApplications` | `applications` |
-| FR-11 | Review application details and documents | Applications Router | Application Service, History Service | `getApplication` | `applications`, `application_documents`, `application_status_history` |
-| FR-12 | Record handover | Animals Router | Animal Service, History Service | `recordHandover` | `animals`, `animal_status_history` |
-| FR-13 | Browse available animals | Animals Router | Animal Service | `listAnimals` | `animals`, `animal_images` |
-| FR-14 | Filter by species and age | Animals Router | Animal Service | `listAnimals` | `animals` |
-| FR-15 | View animal detail | Animals Router | Animal Service | `getAnimal` | `animals`, `animal_images` |
-| FR-16 | Submit application | Applications Router | Application Service, History Service | `submitApplication` | `applications`, `application_documents`, `application_status_history` |
-| FR-17 | Track applications | Applications Router | Application Service | `listApplications` | `applications` |
-| FR-18 | Withdraw application | Applications Router | Application Service, History Service | `withdrawApplication` | `applications`, `application_status_history` |
-| FR-19 | Approve application | Applications Router | Application Service, History Service | `approveApplication` | `animals`, `users` (lock), `applications`, both history tables |
-| FR-20 | Reject application | Applications Router | Application Service, History Service | `rejectApplication` | `applications`, `application_status_history` |
-| FR-21 | Status history | Animals Router, Applications Router | History Service | `getAnimalStatusHistory`, `getApplication` | both history tables |
+| FR-01 | Register, log in and log out | Auth Router | Auth Service | `registerUser`, `loginUser`, `logoutUser` | `users` |
+| FR-02 | Role-based access control | All routers | Security Dependencies | All protected operations | `users`, `shelter_profiles` |
+| FR-03 | View shelter registration requests | Admin Router | Shelter Service | `listShelterRegistrationRequests` | `shelter_profiles` |
+| FR-04 | Approve or reject shelter registration requests | Admin Router | Shelter Service | `approveShelterRegistration`, `rejectShelterRegistration` | `shelter_profiles` |
+| FR-05 | Remove or archive inappropriate listings | Animals Router | Animal Service, History Service | `archiveAnimal` | `animals`, `animal_status_history` |
+| FR-06 | Ban or unban users (BR-07) | Admin Router | User Service, Application Service, History Service | `listUsers`, `banUser`, `unbanUser` | `users`, `applications`, `application_status_history` |
+| FR-07 | Create and update the shelter profile | Shelters Router | Shelter Service | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` | `shelter_profiles` |
+| FR-08 | Add animal listings with image URLs | Animals Router | Animal Service, History Service | `createAnimal` | `animals`, `animal_images`, `animal_status_history` |
+| FR-09 | Update or archive animal listings | Animals Router | Animal Service, History Service | `updateAnimal`, `archiveAnimal` | `animals`, `animal_images`, `animal_status_history` |
+| FR-10 | View adoption applications | Applications Router | Application Service | `listApplications`, `getApplication` | `applications`, `application_documents` |
+| FR-11 | Approve or reject adoption applications | Applications Router | Application Service, History Service | `approveApplication`, `rejectApplication` | `animals`, `users` (lock), `applications`, both history tables |
+| FR-12 | Mark an approved animal as adopted after handover | Animals Router | Animal Service, History Service | `recordHandover` | `animals`, `animal_status_history` |
+| FR-13 | View available animals | Animals Router | Animal Service | `listAnimals` | `animals`, `animal_images` |
+| FR-14 | Search and filter by species and age | Animals Router | Animal Service | `listAnimals` | `animals` |
+| FR-15 | View detailed animal information | Animals Router | Animal Service | `getAnimal` | `animals`, `animal_images` |
+| FR-16 | Submit adoption applications with documents | Applications Router | Application Service, History Service | `submitApplication` | `applications`, `application_documents`, `application_status_history` |
+| FR-17 | View application statuses and history | Applications Router | Application Service, History Service | `listApplications`, `getApplication` | `applications`, `application_status_history` |
+| FR-18 | Withdraw pending applications | Applications Router | Application Service, History Service | `withdrawApplication` | `applications`, `application_status_history` |
+| FR-19 | Automatically reject other pending applications when one is approved (BR-02) | Applications Router | Application Service, History Service | `approveApplication` | `applications`, `application_status_history` |
+| FR-20 | Prevent approval when eligibility requirements are not met (BR-05, BR-06, BR-08) | Applications Router | Application Service | `approveApplication` | `applications`, `application_documents`, `animals`, `users` (lock) |
+| FR-21 | Maintain status history | Animals Router, Applications Router | History Service | `getAnimalStatusHistory`, `getApplication` | both history tables |
 
-Every protected operation also passes through the Security Dependencies (Section 8.1). The K2 gate (Approved shelter profile) applies to FR-08 – FR-12, FR-19 and FR-20.
+Every protected operation also passes through the Security Dependencies (Section 8.1). The K2 gate (Approved shelter profile) applies to FR-08 – FR-12, including the approval rules FR-19 and FR-20.
 
 ### 11.2 Non-Functional Requirements → Architecture
 
