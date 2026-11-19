@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 0.3 (draft) |
-| Status | In progress – ADRs, C4 Level 1–2 and domain model ready for review |
+| Version | 0.4 (draft) |
+| Status | In progress – ADRs, C4 Level 1–3 and domain model ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |
@@ -246,7 +246,85 @@ flowchart TB
 
 ## 5. C4 Level 3 – Component Diagram (Backend)
 
-_To be completed._
+The component diagram zooms into the API Application. It shows the backend modules (ADR-01) and the three layers inside them (ADR-02). Routers and services are grouped by layer; the Repositories box stands for the repository classes of all modules.
+
+```mermaid
+flowchart TB
+    nginx["<b>Web Server / Reverse Proxy</b><br/>[Container: Nginx]"]
+
+    subgraph api["API Application [Container: FastAPI]"]
+        subgraph routers["Router layer"]
+            r_auth["<b>Auth Router</b><br/>[Component: FastAPI router]<br/>/auth/*"]
+            r_animals["<b>Animals Router</b><br/>[Component: FastAPI router]<br/>/animals/*"]
+            r_apps["<b>Applications Router</b><br/>[Component: FastAPI router]<br/>/applications/*"]
+            r_shelters["<b>Shelters Router</b><br/>[Component: FastAPI router]<br/>/shelters/*"]
+            r_admin["<b>Admin Router</b><br/>[Component: FastAPI router]<br/>/admin/*"]
+        end
+
+        security["<b>Security Dependencies</b><br/>[Component]<br/>JWT check, current user,<br/>role, ban and K2 checks"]
+
+        subgraph services["Service layer"]
+            s_auth["<b>Auth Service</b><br/>[Component]<br/>Register, login, bcrypt, JWT"]
+            s_animals["<b>Animal Service</b><br/>[Component]<br/>Listings, archive, handover"]
+            s_apps["<b>Application Service</b><br/>[Component]<br/>Submit, withdraw, approve,<br/>reject; locking, BR-02 – BR-08"]
+            s_shelters["<b>Shelter Service</b><br/>[Component]<br/>Shelter profile, registration<br/>review"]
+            s_users["<b>User Service</b><br/>[Component]<br/>List users, ban / unban, BR-07"]
+            s_history["<b>History Service</b><br/>[Component]<br/>Writes and reads status<br/>history, BR-09"]
+        end
+
+        repos["<b>Repositories</b><br/>[Component: SQLAlchemy]<br/>Queries, locking reads<br/>(SELECT … FOR UPDATE), writes"]
+    end
+
+    db[("<b>Database</b><br/>[Container: MySQL]")]
+
+    nginx -- "Forwards /api/ requests<br/>[JSON over HTTP]" --> routers
+    routers -- "Use" --> security
+    r_auth --> s_auth
+    r_animals --> s_animals
+    r_apps --> s_apps
+    r_shelters --> s_shelters
+    r_admin --> s_shelters
+    r_admin --> s_users
+    s_users -- "Auto-rejects Pending<br/>applications (BR-07)" --> s_apps
+    s_apps -- "Records status changes" --> s_history
+    s_animals -- "Records status changes" --> s_history
+    services -- "Read and write" --> repos
+    security -- "Loads current user<br/>and shelter status" --> repos
+    repos -- "SQL [TCP 3306]" --> db
+
+    classDef container fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef component fill:#85bbf0,stroke:#5d82a8,color:#000000
+    class nginx,db container
+    class r_auth,r_animals,r_apps,r_shelters,r_admin,security,s_auth,s_animals,s_apps,s_shelters,s_users,s_history,repos component
+    style api fill:#ffffff,stroke:#444444,stroke-dasharray: 5 5
+    style routers fill:#f5f5f5,stroke:#999999
+    style services fill:#f5f5f5,stroke:#999999
+```
+
+### 5.1 Components
+
+| Component | Layer | Responsibility | OpenAPI operations | FR |
+|---|---|---|---|---|
+| Auth Router | Router | Registration, login and logout endpoints | `registerUser`, `loginUser`, `logoutUser` | FR-01, FR-02 |
+| Animals Router | Router | Animal listing, detail, create, update, archive, handover and status history endpoints | `listAnimals`, `getAnimal`, `createAnimal`, `updateAnimal`, `archiveAnimal`, `recordHandover`, `getAnimalStatusHistory` | FR-05, FR-08, FR-09, FR-12 – FR-15, FR-21 |
+| Applications Router | Router | Application endpoints for adopters and shelter owners | `submitApplication`, `listApplications`, `getApplication`, `withdrawApplication`, `approveApplication`, `rejectApplication` | FR-10, FR-11, FR-16 – FR-20 |
+| Shelters Router | Router | Shelter profile endpoints of the current shelter owner | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` | FR-03, FR-07 |
+| Admin Router | Router | Shelter registration review and user management endpoints (Admin only) | `listShelterRegistrationRequests`, `approveShelterRegistration`, `rejectShelterRegistration`, `listUsers` (being added in PR #25), `banUser`, `unbanUser` | FR-03, FR-04, FR-06 |
+| Security Dependencies | Cross-cutting | Verifies the JWT, loads the current user, checks the role, rejects banned users where required (BR-07) and requires an Approved shelter profile for shelter operations (K2). Returns 401 or 403. | All protected operations | FR-02, NFR-03 |
+| Auth Service | Service | Creates users with bcrypt password hashes, verifies credentials, issues 30-minute JWT access tokens | – | FR-01, FR-02, NFR-02 |
+| Animal Service | Service | Creates and updates listings, archives listings (owner or Admin), records handover (Reserved → Adopted, sets `ownerAdopterId`) | – | FR-05, FR-08, FR-09, FR-12 – FR-15 |
+| Application Service | Service | Submits and withdraws applications; approves with row locking (ADR-04), document and BR-08 checks and auto-rejection of competing applications; rejects applications | – | FR-10, FR-11, FR-16 – FR-20 |
+| Shelter Service | Service | Creates and updates shelter profiles; approves or rejects registration requests | – | FR-03, FR-04, FR-07 |
+| User Service | Service | Lists users; bans and unbans users; on ban, asks the Application Service to reject the adopter's Pending applications in the same transaction (BR-07) | – | FR-06 |
+| History Service | Service | Writes an immutable status history record for every animal and application status change; maps both history tables to the `StatusChange` schema (ADR-07) | – | FR-21, NFR-09 |
+| Repositories | Repository | SQLAlchemy models and queries for all entities, including locking reads (`SELECT … FOR UPDATE`) | – | – |
+
+### 5.2 Rules Between Components
+
+- Routers call only services and security dependencies; they never access repositories directly.
+- Services own the transaction boundary. A service that triggers a status change calls the History Service inside the same transaction, so a status change and its history record are committed together.
+- Cross-module operations go through services: the User Service calls the Application Service for BR-07, not the application repository.
+- A common exception handler converts service errors into the error body `{status, error, message}` with the status codes defined in the OpenAPI contract (400, 401, 403, 404, 409, 422).
 
 ---
 
