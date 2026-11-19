@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 0.2 (draft) |
-| Status | In progress – architecture decisions and domain model ready for review |
+| Version | 0.3 (draft) |
+| Status | In progress – ADRs, C4 Level 1–2 and domain model ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |
@@ -153,13 +153,94 @@ Secrets are read from a `.env` file that is not committed; the repository contai
 
 ## 3. C4 Level 1 – System Context
 
-_To be completed._
+The context diagram shows Pawradise as a single software system, the people who use it and the external system it depends on. It is consistent with the system context in `docs/02-vision-boundary.md` (Section 6).
+
+```mermaid
+flowchart TB
+    subgraph users["Users (web browser)"]
+        admin["<b>Admin</b><br/>[Person]<br/>Reviews shelter registrations,<br/>moderates listings, bans users"]
+        owner["<b>Shelter Owner</b><br/>[Person]<br/>Manages the shelter profile,<br/>listings, applications, handovers"]
+        adopter["<b>Adopter</b><br/>[Person]<br/>Browses animals, submits and<br/>tracks adoption applications"]
+    end
+
+    pawradise["<b>Pawradise</b><br/>[Software System]<br/>Animal shelter and adoption platform<br/>connecting adopters with shelters"]
+
+    hosting["<b>External Hosting</b><br/>[External System]<br/>Hosts animal images and adoption<br/>documents; Pawradise stores only URLs"]
+
+    admin -- "Reviews shelters, moderates<br/>listings, manages users<br/>[Web browser]" --> pawradise
+    owner -- "Manages shelter, animals<br/>and applications<br/>[Web browser]" --> pawradise
+    adopter -- "Browses animals and<br/>submits applications<br/>[Web browser]" --> pawradise
+    users -. "View images and open documents<br/>from stored URLs<br/>[HTTP/HTTPS URLs]" .-> hosting
+
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef system fill:#1168bd,stroke:#0b4884,color:#ffffff
+    classDef external fill:#999999,stroke:#6b6b6b,color:#ffffff
+    class admin,owner,adopter person
+    class pawradise system
+    class hosting external
+    style users fill:#ffffff,stroke:#444444,stroke-dasharray: 5 5
+```
+
+| Element | Type | Responsibility | Related FR |
+|---|---|---|---|
+| Admin | Person | Reviews shelter registration requests, archives inappropriate listings, bans and unbans users. Admin accounts are seeded, not publicly registered (A-03). | FR-03 – FR-06 |
+| Shelter Owner | Person | Submits and maintains the shelter profile; after approval, manages listings, reviews and decides applications, records handovers. | FR-03, FR-07 – FR-12, FR-19, FR-20 |
+| Adopter | Person | Browses and filters animals, submits, tracks and withdraws applications. | FR-13 – FR-18 |
+| Pawradise | Software system | Enforces all business rules (BR-01 – BR-09) and stores all data, including the URLs of images and documents. | FR-01 – FR-21 |
+| External Hosting | External system | Hosts image and document files. Pawradise never uploads, downloads or proxies these files; the user's browser opens the stored URLs directly. | FR-05, FR-08, FR-11, FR-13 – FR-16 |
+
+**Notes.**
+- Pawradise has no outgoing integrations: no payment, e-mail, messaging, maps or analytics services (out of scope).
+- External Hosting is outside the system's control; an image or document link may become unavailable. The frontend shows a placeholder for broken images.
 
 ---
 
 ## 4. C4 Level 2 – Container Diagram
 
-_To be completed._
+The container diagram zooms into Pawradise and shows the separately running parts of the system, the technologies they use and how they communicate (ADR-01, ADR-03, ADR-06).
+
+```mermaid
+flowchart TB
+    user["<b>User</b><br/>[Person]<br/>Admin, Shelter Owner or Adopter"]
+
+    subgraph boundary["Pawradise [Software System]"]
+        nginx["<b>Web Server / Reverse Proxy</b><br/>[Container: Nginx]<br/>Serves the React build;<br/>forwards /api/ to the API"]
+        spa["<b>Single-Page Application</b><br/>[Container: React, runs in the browser]<br/>Screens for all three roles;<br/>calls the REST API"]
+        api["<b>API Application</b><br/>[Container: Python, FastAPI, Uvicorn]<br/>REST API, authentication,<br/>business rules, transactions"]
+        db[("<b>Database</b><br/>[Container: MySQL, InnoDB]<br/>Users, shelters, animals,<br/>applications, status history")]
+    end
+
+    hosting["<b>External Hosting</b><br/>[External System]<br/>Hosts images and documents"]
+
+    user -- "Opens the website<br/>[HTTP, port 80]" --> nginx
+    user -- "Uses the role-specific screens<br/>[Web browser]" --> spa
+    nginx -- "Delivers the React build<br/>[HTTP]" --> spa
+    spa == "Sends API requests<br/>[JSON over HTTP, /api/*]" ==> nginx
+    nginx -- "Forwards /api/ requests<br/>[HTTP, port 8000, internal network]" --> api
+    api -- "Reads and writes<br/>[SQLAlchemy, TCP 3306]" --> db
+    spa -. "Loads images and documents<br/>[HTTP/HTTPS URLs]" .-> hosting
+
+    classDef person fill:#08427b,stroke:#052e56,color:#ffffff
+    classDef container fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef external fill:#999999,stroke:#6b6b6b,color:#ffffff
+    class user person
+    class spa,nginx,api,db container
+    class hosting external
+    style boundary fill:#ffffff,stroke:#444444,stroke-dasharray: 5 5
+```
+
+| Container | Technology | Responsibility | Interfaces |
+|---|---|---|---|
+| Single-Page Application | React | Role-specific screens (see `docs/09-ui-ux.md`); keeps the access token for the session and sends it as `Authorization: Bearer <token>`; redirects to the login screen on 401. Contains no business rules. | Calls the REST API through `/api/*`; loads images and documents from their URLs |
+| Web Server / Reverse Proxy | Nginx | Serves the static React build; forwards every `/api/` request to the API Application. The only entry point exposed to the host (port 80). | HTTP on port 80 from the browser; HTTP to the API on the internal network |
+| API Application | Python, FastAPI, Uvicorn, SQLAlchemy | Implements the OpenAPI contract: authentication (JWT, bcrypt), role checks, business rules BR-01 – BR-09, transactions and row locking, status history. Internal structure: Section 5. | REST/JSON as defined in `api/openapi.yaml`; SQL to the database |
+| Database | MySQL (InnoDB) | Stores all persistent data (Section 6 and Section 7); provides transactions, row-level locks and foreign keys. Data persists in the named volume `mysql_data`. | Accessible only from the API Application on the internal network |
+
+**C4 containers and Docker containers.** In C4, a *container* is any separately running unit, so the React application running in the user's browser is a container of its own. In the deployment (Section 10) there are three Docker containers: `frontend` (Nginx with the React build), `backend` (API Application) and `db` (Database).
+
+**HTTP and HTTPS.** The local and demo deployment serves Pawradise over HTTP on port 80, as defined in the Docker Compose plan. Serving HTTPS would require a TLS certificate on Nginx (port 443); this is out of scope for the current sprints and would not change the other containers.
+
+**Security boundaries.** The browser is an untrusted client; every rule is enforced in the API Application. Only Nginx is reachable from outside; the API and the database are on the internal Docker network (ADR-06).
 
 ---
 
