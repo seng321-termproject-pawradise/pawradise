@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 0.5 (draft) |
-| Status | In progress – ADRs, C4 Level 1–3, domain model and database schema ready for review |
+| Version | 0.6 (draft) |
+| Status | In progress – ADRs, C4 Level 1–3, domain model, database schema, sequence and state diagrams ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |
@@ -635,13 +635,201 @@ InnoDB creates an index for every primary key, unique key and foreign key. The f
 
 ## 8. Sequence Diagrams
 
-_To be completed._
+The API-level flows F1 – F8 (registration, browsing and applying, approval, concurrent approval, handover, withdrawal, rejection, ban) are specified in `docs/03-api-flows.md`. This section shows how the components of Section 5 work together inside the API Application for the three flows with the most architectural impact.
+
+### 8.1 Authenticated Request
+
+Every protected request passes through the Security Dependencies before a service is called (ADR-05).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as User (browser)
+    participant N as Nginx
+    participant R as Router
+    participant SD as Security Dependencies
+    participant RP as Repositories
+    participant DB as MySQL
+    participant S as Service
+
+    U->>N: Request with Authorization: Bearer <token>
+    N->>R: Forward /api/ request
+    R->>SD: Resolve current user
+    SD->>SD: Verify JWT signature and expiry
+    alt Token missing, invalid or expired
+        SD-->>U: 401 Unauthorized
+    end
+    SD->>RP: Load user (and shelter profile)
+    RP->>DB: SELECT user, shelter profile
+    DB-->>RP: Rows
+    RP-->>SD: User, role, banned, shelter status
+    alt Wrong role, banned (where required) or shelter not Approved (K2)
+        SD-->>U: 403 Forbidden
+    end
+    SD-->>R: Current user
+    R->>S: Call service operation
+    S-->>R: Result or domain error
+    R-->>U: 2xx response or {status, error, message}
+```
+
+The user is loaded from the database on every request, so a ban or a change of the shelter registration status takes effect immediately, not at token expiry.
+
+### 8.2 Approve an Application
+
+The approval is the most critical transaction of the system (BR-02, BR-05, BR-06, BR-08, BR-09; ADR-04). It corresponds to flows F3 and F4 in `docs/03-api-flows.md`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor SO as Shelter Owner
+    participant R as Applications Router
+    participant AS as Application Service
+    participant HS as History Service
+    participant RP as Repositories
+    participant DB as MySQL
+
+    SO->>R: POST /applications/{id}/approve
+    Note over R: Security Dependencies: role SHELTER_OWNER,<br/>shelter Approved (K2), owns the animal
+    R->>AS: approve(applicationId, currentUser)
+    AS->>RP: BEGIN transaction
+    AS->>RP: Lock animal row
+    RP->>DB: SELECT … FROM animals WHERE id = ? FOR UPDATE
+    AS->>RP: Lock adopter row
+    RP->>DB: SELECT … FROM users WHERE id = ? FOR UPDATE
+    AS->>AS: Re-check: application Pending, animal Available
+    alt Animal no longer Available or application not Pending
+        AS->>RP: ROLLBACK
+        AS-->>R: Conflict
+        R-->>SO: 409 Conflict
+    end
+    AS->>AS: Check required documents (BR-05, BR-06)
+    AS->>RP: Count adopter's Approved applications<br/>whose animal is Reserved or Adopted (BR-08)
+    alt Documents missing or limit of three reached
+        AS->>RP: ROLLBACK
+        AS-->>R: Unprocessable
+        R-->>SO: 422 Unprocessable Content
+    end
+    AS->>RP: Application → Approved, animal → Reserved
+    AS->>RP: Other Pending applications for the animal → Rejected (BR-02)
+    AS->>HS: Record all status changes (BR-09)
+    HS->>RP: INSERT history rows
+    AS->>RP: COMMIT (locks released)
+    AS-->>R: ApprovalResult
+    R-->>SO: 200 OK
+```
+
+- The animal row is locked first, then the adopter row; all transactions use this order to avoid deadlocks.
+- All checks are repeated **after** the locks are acquired. A second request for the same animal waits for the first one and then returns 409; a concurrent approval for another animal of the same adopter waits for the adopter lock and then returns 422 if the limit is reached.
+- The status changes and their history records are committed together or not at all.
+
+### 8.3 Ban an Adopter
+
+Banning an adopter and rejecting their Pending applications happen in one transaction (BR-07, flow F8).
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as Admin
+    participant R as Admin Router
+    participant US as User Service
+    participant AS as Application Service
+    participant HS as History Service
+    participant RP as Repositories
+    participant DB as MySQL
+
+    A->>R: POST /admin/users/{userId}/ban
+    Note over R: Security Dependencies: role ADMIN
+    R->>US: ban(userId, currentUser)
+    US->>RP: BEGIN transaction
+    US->>RP: Lock user row
+    RP->>DB: SELECT … FROM users WHERE id = ? FOR UPDATE
+    US->>RP: Set banned = true
+    US->>AS: Reject Pending applications of the adopter (BR-07)
+    AS->>RP: Pending applications → Rejected
+    AS->>HS: Record status changes (changedBy = Admin)
+    HS->>RP: INSERT history rows
+    Note over AS: Approved applications stay unchanged
+    US->>RP: COMMIT
+    US-->>R: BanUserResult
+    R-->>A: 200 OK
+```
+
+The ban locks the same adopter row as the approval transaction (8.2), so a ban and an approval for the same adopter cannot interleave: either the approval commits first and stays Approved, or the application is already Rejected and the approval returns 409.
 
 ---
 
 ## 9. State Diagrams
 
-_To be completed._
+Status values are stored as enumerations (Section 7.2). Every transition is triggered by exactly one API operation or automatic rule and is recorded in the status history (BR-09). A request for a transition that is not shown below returns 409 Conflict.
+
+### 9.1 Animal
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Available: createAnimal (FR-08)
+    Available --> Reserved: approveApplication (FR-19, BR-02, BR-04)
+    Reserved --> Adopted: recordHandover (FR-12, sets ownerAdopterId)
+    Available --> Archived: archiveAnimal (FR-05, FR-09)
+    Adopted --> [*]
+    Archived --> [*]
+```
+
+| Transition | Trigger | Condition |
+|---|---|---|
+| – → Available | `createAnimal` | Shelter profile Approved (K2) |
+| Available → Reserved | `approveApplication` | Inside the approval transaction (Section 8.2) |
+| Reserved → Adopted | `recordHandover` | Physical handover; sets `ownerAdopterId` (BR-04) |
+| Available → Archived | `archiveAnimal` | Owning shelter or Admin (moderation, FR-05) |
+
+Adopted and Archived are final states. Reserved and Adopted animals cannot be archived.
+
+### 9.2 Adoption Application
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Pending: submitApplication (FR-16)
+    Pending --> Approved: approveApplication (FR-19)
+    Pending --> Rejected: rejectApplication (FR-20)
+    Pending --> Rejected: automatic – another application approved (BR-02)
+    Pending --> Rejected: automatic – adopter banned (BR-07)
+    Pending --> Withdrawn: withdrawApplication (FR-18, BR-03)
+    Approved --> [*]
+    Rejected --> [*]
+    Withdrawn --> [*]
+```
+
+| Transition | Trigger | Condition |
+|---|---|---|
+| – → Pending | `submitApplication` | Adopter not banned; animal Available; required documents for apartment and dog (BR-06) |
+| Pending → Approved | `approveApplication` | Documents complete; adoption limit not reached (BR-05, BR-08) |
+| Pending → Rejected | `rejectApplication` | Shelter owner decision |
+| Pending → Rejected | automatic | Another application for the same animal is approved (BR-02) |
+| Pending → Rejected | automatic | The adopter is banned (BR-07) |
+| Pending → Withdrawn | `withdrawApplication` | Only the adopter who submitted it (BR-03) |
+
+Only Pending applications can change status; Approved, Rejected and Withdrawn are final.
+
+### 9.3 Shelter Registration
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Pending: createShelterProfile (FR-03)
+    Pending --> Approved: approveShelterRegistration (FR-04)
+    Pending --> Rejected: rejectShelterRegistration (FR-04)
+    Approved --> [*]
+    Rejected --> [*]
+```
+
+| Transition | Trigger | Condition |
+|---|---|---|
+| – → Pending | `createShelterProfile` | Shelter Owner without a profile (a second profile returns 409) |
+| Pending → Approved | `approveShelterRegistration` | Admin only |
+| Pending → Rejected | `rejectShelterRegistration` | Admin only |
+
+Approved and Rejected are final states. A rejected shelter cannot apply again (decision K3). Only an Approved shelter can manage animals and applications (decision K2).
 
 ---
 
