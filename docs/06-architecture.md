@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 0.1 (draft) |
-| Status | In progress – domain model ready for review |
+| Version | 0.2 (draft) |
+| Status | In progress – architecture decisions and domain model ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |
@@ -35,17 +35,119 @@ The document covers the Sprint 2 architecture baseline. It is aligned with the O
 
 ## 2. Architecture Decisions (ADRs)
 
-_To be completed._
+Each decision records its context, the decision, the alternatives considered and the consequences. All decisions below are accepted by the team (decisions K1, K8, K9).
 
-Planned decisions:
+| ADR | Decision | Related requirements |
+|---|---|---|
+| ADR-01 | Modular monolith | NFR-08, NFR-10 |
+| ADR-02 | Layered backend (Router → Service → Repository) | BR-01 – BR-09 |
+| ADR-03 | API-first REST design with OpenAPI | NFR-05 |
+| ADR-04 | MySQL InnoDB with pessimistic row locking for approvals | NFR-08, BR-02, BR-08 |
+| ADR-05 | JWT authentication and bcrypt password hashing | NFR-02, NFR-03, BR-07 |
+| ADR-06 | Docker Compose deployment with Nginx as the single entry point | NFR-10 |
+| ADR-07 | Separate status history tables | NFR-09, BR-09 |
 
-- ADR-01: Modular monolith
-- ADR-02: Layered backend (Router → Service → Repository)
-- ADR-03: API-first REST design with OpenAPI
-- ADR-04: MySQL InnoDB with row-level locking for approvals
-- ADR-05: JWT authentication (30-minute access token, no refresh token) and bcrypt password hashing
-- ADR-06: Docker Compose deployment with Nginx as the single entry point
-- ADR-07: Separate status history tables (see Section 6.4)
+### ADR-01: Modular Monolith
+
+**Context.** The system has four functional areas (identity, shelters, animals, adoption applications) that share one data set. The most important operations, such as approving an application or banning an adopter, change data from several areas in a single atomic step (BR-02, BR-07). The team has six members and a ten-week schedule.
+
+**Decision.** The backend is built as one deployable FastAPI application, divided into modules: `auth`, `users` (including admin operations), `shelters`, `animals`, `applications` and `history`. Modules communicate through service-layer function calls, not over the network.
+
+**Alternatives considered.** Microservices (one service per area) were rejected: atomic operations across areas would need distributed transactions, and the operational cost (more containers, network calls, separate databases) is not justified for this team size and scope.
+
+**Consequences.** A single database transaction can cover animals, applications and history. There is one backend container to build and deploy. Module boundaries are kept by package structure and code review, so they are not enforced at runtime.
+
+### ADR-02: Layered Backend (Router → Service → Repository)
+
+**Context.** Business rules (BR-01 – BR-09) must be applied the same way regardless of which endpoint triggers them, and the backend must be testable (unit-test coverage target in Sprint 3).
+
+**Decision.** Each module has three layers:
+
+| Layer | Responsibility | Must not |
+|---|---|---|
+| Router | HTTP endpoints, request/response validation (Pydantic schemas), authentication and role dependencies, mapping errors to HTTP status codes | Contain business rules or SQL |
+| Service | Business rules, eligibility checks, status transitions, transaction boundaries, writing status history | Know about HTTP |
+| Repository | Database access with SQLAlchemy (queries, locking reads, inserts, updates) | Contain business rules |
+
+Dependencies point downwards only: Router → Service → Repository.
+
+**Alternatives considered.** Putting logic directly in route handlers was rejected because the same rules (for example, BR-07 auto-rejection) would be duplicated and hard to test.
+
+**Consequences.** Services can be unit-tested without HTTP, and repositories can be replaced with test doubles. Some simple operations pass through layers that add little logic; this is accepted for consistency.
+
+### ADR-03: API-First REST Design with OpenAPI
+
+**Context.** Frontend, backend and UI design are developed in parallel by different team members.
+
+**Decision.** The REST contract in `api/openapi.yaml` is the single source of truth for endpoints, request and response schemas, status codes and the common error body `{status, error, message}`. The contract is changed through pull requests before the implementation changes. Figma screens are mapped to `operationId`s.
+
+**Alternatives considered.** Generating the contract from backend code only was rejected, because frontend and design work would have to wait for the backend.
+
+**Consequences.** Teams can work in parallel against a stable contract. FastAPI also generates its own OpenAPI document at runtime; it must be compared with `api/openapi.yaml` to detect drift between contract and code.
+
+### ADR-04: MySQL InnoDB with Pessimistic Row Locking for Approvals
+
+**Context.** Two shelter-owner requests may try to approve applications at the same time. The system must guarantee that only one application is approved per animal (BR-02, NFR-08) and that an adopter never exceeds three Reserved or Adopted animals (BR-08), even when approvals for different animals of the same adopter run concurrently.
+
+**Decision.** MySQL with the InnoDB engine (transactions, row-level locks, foreign keys) is used. The approval transaction:
+
+1. Locks the animal row with `SELECT … FOR UPDATE`.
+2. Locks the adopter's user row with `SELECT … FOR UPDATE`.
+3. Re-checks the animal status, the required documents and the BR-08 count **after** the locks are acquired.
+4. Updates the application and the animal, auto-rejects competing Pending applications and writes the status history.
+5. Commits.
+
+Locks are always taken in the same order (animal, then adopter) to avoid deadlocks. A request that finds the animal no longer Available returns 409; a request that finds the limit reached returns 422.
+
+**Alternatives considered.**
+- *Optimistic locking* (version column, retry on conflict): rejected because the adopter-limit check involves several rows and would need more complex retry logic.
+- *SERIALIZABLE isolation for all transactions*: rejected because it increases lock contention and deadlocks for ordinary read operations.
+
+**Consequences.** Concurrent approvals for the same animal or the same adopter are serialized; others run in parallel. The behaviour must be verified by the concurrency tests defined in NFR-08.
+
+### ADR-05: JWT Authentication and bcrypt Password Hashing
+
+**Context.** All operations except registration and login require an authenticated user with a role (NFR-03). Passwords must never be stored in plain text (NFR-02).
+
+**Decision.**
+- Passwords are hashed with bcrypt (work factor 12). Only the hash is stored; it is never returned by the API.
+- Login returns a signed JWT access token (HS256, secret `JWT_SECRET` from the environment) with a lifetime of **30 minutes**. There is no refresh token: after expiry the API returns 401 and the user logs in again (decision K9).
+- On every protected request the backend verifies the token and loads the user from the database, so that the current role, the ban flag (BR-07) and, for shelter owners, the shelter registration status (decision K2) are always up to date.
+- Logout is handled by the client discarding the token.
+
+**Alternatives considered.**
+- *Server-side sessions*: rejected; a stateless token keeps the backend simpler and fits the API-first design.
+- *Refresh tokens*: rejected for the first release to keep the design simple (K9).
+
+**Consequences.** A ban or a shelter-status change takes effect on the next request, not at token expiry. Because tokens are not stored on the server, a token copied before logout remains valid until it expires; the short 30-minute lifetime limits this risk.
+
+### ADR-06: Docker Compose Deployment with Nginx as the Single Entry Point
+
+**Context.** The system must start with a single command on the team's machines and in the final demo (NFR-10).
+
+**Decision.** Three containers are defined in one Docker Compose project (decision K8):
+
+| Container | Content | Port |
+|---|---|---|
+| `frontend` | Nginx serving the React build; forwards `/api/` requests to the backend | 80, the only port published to the host |
+| `backend` | FastAPI on Uvicorn | 8000, internal network only (optionally `127.0.0.1:8000` in development for Swagger) |
+| `db` | MySQL with the named volume `mysql_data` | 3306, internal network only |
+
+Secrets are read from a `.env` file that is not committed; the repository contains only `.env.example`.
+
+**Alternatives considered.** Publishing the backend port directly to the browser was rejected: it would require CORS configuration and expose the backend.
+
+**Consequences.** Browser and API share one origin, so no CORS is needed. The database and backend are not reachable from outside. Health checks are needed so that services start in the right order.
+
+### ADR-07: Separate Status History Tables
+
+**Context.** Every animal and application status change must be recorded immutably (BR-09, NFR-09). The API returns these records through one schema, `StatusChange` (`entityType`, `entityId`).
+
+**Decision.** Animal and application status changes are stored in two tables, `animal_status_history` and `application_status_history`, each with a foreign key to its animal or application.
+
+**Alternatives considered.** A single polymorphic table (`entityType` + `entityId`) was rejected: `entityId` could refer to either an animal or an application, so the database could not enforce a foreign key.
+
+**Consequences.** The database guarantees that every history record refers to an existing entity. The backend maps rows from both tables to the single `StatusChange` schema. Animals and applications are never hard-deleted, so the foreign keys do not block normal operations.
 
 ---
 
