@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 0.4 (draft) |
-| Status | In progress – ADRs, C4 Level 1–3 and domain model ready for review |
+| Version | 0.5 (draft) |
+| Status | In progress – ADRs, C4 Level 1–3, domain model and database schema ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |
@@ -500,7 +500,136 @@ Fields marked with `?` are optional (nullable).
 
 ## 7. Database Schema (ER Diagram)
 
-_To be completed._
+The database schema implements the domain model (Section 6) in MySQL with the InnoDB engine (ADR-04). Table and column names use `snake_case`; the API uses `camelCase` (for example, `owner_adopter_id` ↔ `ownerAdopterId`). The SQLAlchemy models map between the two.
+
+```mermaid
+erDiagram
+    users {
+        bigint id PK
+        varchar full_name
+        varchar email UK
+        varchar password_hash
+        enum role "ADMIN, SHELTER_OWNER, ADOPTER"
+        boolean banned
+        datetime created_at
+    }
+
+    shelter_profiles {
+        bigint id PK
+        bigint owner_user_id FK, UK
+        varchar name
+        varchar address
+        varchar contact_email
+        varchar phone
+        text description "nullable"
+        enum status "Pending, Approved, Rejected"
+        datetime created_at
+        datetime updated_at
+    }
+
+    animals {
+        bigint id PK
+        bigint shelter_id FK
+        bigint owner_adopter_id FK "nullable, set at handover"
+        varchar name
+        varchar species
+        varchar breed
+        int age_years
+        varchar gender
+        text description "nullable"
+        enum status "Available, Reserved, Adopted, Archived"
+        datetime created_at
+        datetime updated_at
+    }
+
+    animal_images {
+        bigint id PK
+        bigint animal_id FK
+        varchar url
+    }
+
+    applications {
+        bigint id PK
+        bigint adopter_id FK
+        bigint animal_id FK
+        boolean lives_in_apartment
+        text note "nullable"
+        enum status "Pending, Approved, Rejected, Withdrawn"
+        datetime created_at
+        datetime updated_at
+    }
+
+    application_documents {
+        bigint id PK
+        bigint application_id FK
+        varchar type
+        varchar url
+    }
+
+    animal_status_history {
+        bigint id PK
+        bigint animal_id FK
+        enum previous_status "nullable"
+        enum new_status
+        bigint changed_by FK
+        datetime changed_at
+    }
+
+    application_status_history {
+        bigint id PK
+        bigint application_id FK
+        enum previous_status "nullable"
+        enum new_status
+        bigint changed_by FK
+        datetime changed_at
+    }
+
+    users ||--o| shelter_profiles : "owns"
+    shelter_profiles ||--o{ animals : "lists"
+    users |o--o{ animals : "owns after handover"
+    animals ||--o{ animal_images : "has"
+    users ||--o{ applications : "submits"
+    animals ||--o{ applications : "receives"
+    applications ||--o{ application_documents : "includes"
+    animals ||--o{ animal_status_history : "records"
+    applications ||--o{ application_status_history : "records"
+    users ||--o{ animal_status_history : "changes"
+    users ||--o{ application_status_history : "changes"
+```
+
+`PK` = primary key, `FK` = foreign key, `UK` = unique key.
+
+### 7.1 Tables
+
+| Table | Entity | Key constraints |
+|---|---|---|
+| `users` | User | `email` is unique. `role` and `banned` are read on every protected request (ADR-05). |
+| `shelter_profiles` | ShelterProfile | `owner_user_id` is unique: one profile per Shelter Owner (a second profile returns 409). |
+| `animals` | Animal | `shelter_id` is required. `owner_adopter_id` is nullable and set only at handover (Section 6.4). |
+| `animal_images` | AnimalImage | One row per image URL. |
+| `applications` | Application | `adopter_id` and `animal_id` are required. |
+| `application_documents` | ApplicationDocument | One row per document link. |
+| `animal_status_history` | AnimalStatusHistory | Insert-only (ADR-07, BR-09). |
+| `application_status_history` | ApplicationStatusHistory | Insert-only (ADR-07, BR-09). |
+
+### 7.2 Design Rules
+
+1. **Identifiers.** All primary keys are `BIGINT AUTO_INCREMENT`, matching the `int64` identifiers in the OpenAPI contract.
+2. **Enumerations.** Roles and statuses are stored as MySQL `ENUM` columns with exactly the values of the enumerations in Section 6.1, so invalid values are rejected by the database.
+3. **Time.** All `datetime` columns store UTC. `created_at` is set on insert; `updated_at` is set on every update.
+4. **No hard deletes.** All foreign keys use `ON DELETE RESTRICT`. Animals are archived, applications change status, and users are banned; no row with history is deleted (BR-09).
+5. **Immutable history.** The application only inserts into the two history tables; no update or delete statement is issued for them.
+6. **Passwords.** `password_hash` stores the bcrypt hash only (ADR-05, NFR-02).
+
+### 7.3 Indexes
+
+InnoDB creates an index for every primary key, unique key and foreign key. The following additional indexes support the main queries:
+
+| Index | Supports |
+|---|---|
+| `animals (status, species, age_years)` | Browsing and filtering available animals (FR-13, FR-14, NFR-01) |
+| `applications (animal_id, status)` | Listing applications of an animal and auto-rejecting competing Pending applications (FR-10, BR-02) |
+| `applications (adopter_id, status)` | Listing an adopter's applications and counting Approved applications for BR-08 (FR-17, FR-19) |
 
 ---
 
