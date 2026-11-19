@@ -3,8 +3,8 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 0.6 (draft) |
-| Status | In progress – ADRs, C4 Level 1–3, domain model, database schema, sequence and state diagrams ready for review |
+| Version | 1.0 |
+| Status | Ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |
@@ -835,10 +835,115 @@ Approved and Rejected are final states. A rejected shelter cannot apply again (d
 
 ## 10. Deployment Diagram
 
-_To be completed._
+The system is deployed with Docker Compose on a single host (ADR-06, decision K8). The diagram uses UML deployment notation: devices, execution environments and deployed artifacts.
+
+```mermaid
+flowchart LR
+    subgraph client["User device «device»"]
+        browser["<b>Web Browser</b><br/>«execution environment»<br/>Runs the React SPA"]
+    end
+
+    subgraph host["Docker Host «device»<br/>Linux or Windows with Docker Compose"]
+        subgraph net["Compose network «internal»"]
+            fe["<b>frontend</b><br/>«Docker container»<br/>Nginx + React build<br/>Port 80 → host 80"]
+            be["<b>backend</b><br/>«Docker container»<br/>FastAPI on Uvicorn<br/>Port 8000 (internal)"]
+            dbc["<b>db</b><br/>«Docker container»<br/>MySQL (InnoDB)<br/>Port 3306 (internal)"]
+        end
+        vol[("<b>mysql_data</b><br/>«named volume»")]
+        env["<b>.env</b><br/>«configuration file»<br/>Secrets, not committed"]
+    end
+
+    ext["<b>External Hosting</b><br/>«external system»<br/>Images and documents"]
+
+    browser -- "HTTP, port 80" --> fe
+    fe -- "/api/ → HTTP :8000" --> be
+    be -- "TCP :3306" --> dbc
+    dbc --- vol
+    env -. "Environment variables" .-> be
+    env -. "Environment variables" .-> dbc
+    browser -. "HTTP/HTTPS URLs" .-> ext
+
+    classDef node fill:#438dd5,stroke:#2e6295,color:#ffffff
+    classDef other fill:#999999,stroke:#6b6b6b,color:#ffffff
+    class fe,be,dbc,browser node
+    class ext,env other
+```
+
+### 10.1 Docker Compose Services
+
+| Service | Content | Ports | Depends on | Configuration |
+|---|---|---|---|---|
+| `frontend` | Nginx serving the React build; forwards `/api/` to `backend:8000` | `80:80` (the only published port) | `backend` | Nginx configuration |
+| `backend` | FastAPI application on Uvicorn | `8000` on the internal network only; optionally `127.0.0.1:8000:8000` in development for Swagger | `db` | `DATABASE_URL`, `JWT_SECRET`, `JWT_ALGORITHM` (HS256), `ACCESS_TOKEN_EXPIRE_MINUTES` (30) |
+| `db` | MySQL with InnoDB | `3306` on the internal network only | – | `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`, `MYSQL_ROOT_PASSWORD`; volume `mysql_data` |
+
+### 10.2 Deployment Rules
+
+1. **Single command.** The whole system starts with `docker compose up --build` (NFR-10).
+2. **Secrets.** Real values are kept in `.env`, which is listed in `.gitignore`. The repository contains only `.env.example` with placeholder values.
+3. **Persistence.** Database files are stored in the named volume `mysql_data`; stopping or rebuilding containers does not delete data.
+4. **Start order.** `depends_on` with health checks ensures that the database accepts connections before the backend starts, and the backend is ready before Nginx forwards requests. The health checks are defined in the Docker Compose file (DevOps).
+5. **Exposure.** Only port 80 is published. The backend and the database cannot be reached from outside the Docker host (Section 4, security boundaries).
+6. **Admin accounts.** Admin users are created by a seed step during deployment, not through public registration (A-03).
 
 ---
 
-## 11. Traceability (FR → Component)
+## 11. Traceability
 
-_To be completed._
+### 11.1 Functional Requirements → Components
+
+Each functional requirement of `docs/07-srs.md` is implemented by the components below (Section 5) and stored in the listed tables (Section 7).
+
+| FR | Requirement | Router | Service | OpenAPI operations | Tables |
+|---|---|---|---|---|---|
+| FR-01 | User registration | Auth Router | Auth Service | `registerUser` | `users` |
+| FR-02 | Login and logout | Auth Router, Security Dependencies | Auth Service | `loginUser`, `logoutUser` | `users` |
+| FR-03 | Shelter registration request and review | Shelters Router, Admin Router | Shelter Service | `createShelterProfile`, `listShelterRegistrationRequests` | `shelter_profiles` |
+| FR-04 | Approve or reject shelter registration | Admin Router | Shelter Service | `approveShelterRegistration`, `rejectShelterRegistration` | `shelter_profiles` |
+| FR-05 | Admin listing moderation | Animals Router | Animal Service, History Service | `archiveAnimal` | `animals`, `animal_status_history` |
+| FR-06 | Ban and unban users (BR-07) | Admin Router | User Service, Application Service, History Service | `listUsers`, `banUser`, `unbanUser` | `users`, `applications`, `application_status_history` |
+| FR-07 | Shelter profile management | Shelters Router | Shelter Service | `getMyShelterProfile`, `updateMyShelterProfile` | `shelter_profiles` |
+| FR-08 | Create animal listing | Animals Router | Animal Service, History Service | `createAnimal` | `animals`, `animal_images`, `animal_status_history` |
+| FR-09 | Update and archive listing | Animals Router | Animal Service, History Service | `updateAnimal`, `archiveAnimal` | `animals`, `animal_images`, `animal_status_history` |
+| FR-10 | View shelter applications | Applications Router | Application Service | `listApplications` | `applications` |
+| FR-11 | Review application details and documents | Applications Router | Application Service, History Service | `getApplication` | `applications`, `application_documents`, `application_status_history` |
+| FR-12 | Record handover | Animals Router | Animal Service, History Service | `recordHandover` | `animals`, `animal_status_history` |
+| FR-13 | Browse available animals | Animals Router | Animal Service | `listAnimals` | `animals`, `animal_images` |
+| FR-14 | Filter by species and age | Animals Router | Animal Service | `listAnimals` | `animals` |
+| FR-15 | View animal detail | Animals Router | Animal Service | `getAnimal` | `animals`, `animal_images` |
+| FR-16 | Submit application | Applications Router | Application Service, History Service | `submitApplication` | `applications`, `application_documents`, `application_status_history` |
+| FR-17 | Track applications | Applications Router | Application Service | `listApplications` | `applications` |
+| FR-18 | Withdraw application | Applications Router | Application Service, History Service | `withdrawApplication` | `applications`, `application_status_history` |
+| FR-19 | Approve application | Applications Router | Application Service, History Service | `approveApplication` | `animals`, `users` (lock), `applications`, both history tables |
+| FR-20 | Reject application | Applications Router | Application Service, History Service | `rejectApplication` | `applications`, `application_status_history` |
+| FR-21 | Status history | Animals Router, Applications Router | History Service | `getAnimalStatusHistory`, `getApplication` | both history tables |
+
+Every protected operation also passes through the Security Dependencies (Section 8.1). The K2 gate (Approved shelter profile) applies to FR-08 – FR-12, FR-19 and FR-20.
+
+### 11.2 Non-Functional Requirements → Architecture
+
+| NFR | Quality attribute | Architectural support |
+|---|---|---|
+| NFR-01 | Performance | Layered backend with direct SQL access through repositories; indexes for browsing and filtering (Section 7.3) |
+| NFR-02 | Password security | bcrypt with work factor 12; hash never returned (ADR-05, Section 7.2) |
+| NFR-03 | Authentication and authorization | JWT, Security Dependencies with role, ban and K2 checks on every request (ADR-05, Section 8.1) |
+| NFR-05 | Consistent error handling | Common error body `{status, error, message}` from one exception handler (ADR-03, Section 5.2) |
+| NFR-06, NFR-07 | Browser support, responsive UI | React single-page application served by Nginx; responsive layouts defined in `docs/09-ui-ux.md` (Section 4) |
+| NFR-08 | Consistency under concurrency | InnoDB row locking in a fixed order, re-checks after locking (ADR-04, Section 8.2) |
+| NFR-09 | Audit trail | Insert-only history tables with foreign keys, written in the same transaction (ADR-07, Section 7.2) |
+| NFR-10 | Deployability | Docker Compose, single command, Nginx as the single entry point (ADR-06, Section 10) |
+
+The full list of NFRs, their measurable targets and verification methods is specified in `docs/08-nfr.md`.
+
+### 11.3 Business Rules → Components
+
+| Rule | Enforced in |
+|---|---|
+| BR-01 | Application Service (multiple applications allowed) |
+| BR-02 | Application Service – approval transaction (Section 8.2) |
+| BR-03 | Application Service – withdraw |
+| BR-04 | Application Service (Reserved) and Animal Service (Adopted at handover) |
+| BR-05, BR-06 | Application Service – submit and approve |
+| BR-07 | Security Dependencies (banned users) and User Service → Application Service (Section 8.3) |
+| BR-08 | Application Service – count after adopter lock (Sections 6.4, 8.2) |
+| BR-09 | History Service; insert-only history tables (ADR-07) |
