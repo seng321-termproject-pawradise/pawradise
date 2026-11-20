@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: pawradise - Animal Shelter & Adoption System API
-  version: 0.1.0
+  version: 0.2.0
   contact:
     name: Pawradise Team (SENG 321)
     url: https://github.com/seng321-termproject-pawradise/pawradise
@@ -835,6 +835,36 @@ paths:
   # ---------------------------------------------------------------------------
   # Admin
   # ---------------------------------------------------------------------------
+    /admin/users:
+    get:
+      tags: [Admin]
+      operationId: listAdminUsers
+      summary: List users (FR-06)
+      description: >
+        Admin only. Returns registered users.
+        Results can optionally be filtered by user role.
+      parameters:
+        - in: query
+          name: role
+          required: false
+          description: Filter users by role.
+          schema:
+            $ref: '#/components/schemas/UserRole'
+          example: ADOPTER
+      responses:
+        '200':
+          description: Users matching the optional role filter
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+          
   /admin/shelters/requests:
     get:
       tags: [Admin]
