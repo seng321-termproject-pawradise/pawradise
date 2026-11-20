@@ -8,6 +8,7 @@ All team meetings and team decisions are recorded in this folder by the Scrum Ma
 |---|---|---|
 | 2026-10-29 | Project Kickoff (Google Meet) | [2026-10-29-project-kickoff.md](2026-10-29-project-kickoff.md) |
 | Sprint 1 | Online decision log (WhatsApp) | [sprint-1-decision-log.md](sprint-1-decision-log.md) |
+| Sprint 2 | Planning and decision log (WhatsApp) | [sprint-2-decision-log.md](sprint-2-decision-log.md) |
 
 ## File Naming
 
