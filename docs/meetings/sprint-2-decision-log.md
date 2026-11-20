@@ -18,10 +18,10 @@ Decision numbers follow the team's list; K5 (calendar) is intentionally not used
 | # | Topic | Decision | Applied in |
 |---|---|---|---|
 | K1 | Architecture | Modular monolith with React, FastAPI, and MySQL. Layers: Router → Service → Repository. Authentication with JWT and bcrypt password hashing. Three containers with docker-compose. | `docs/06-architecture.md` (#53) |
-| K2 | Shelter registration statuses (closes OI-04) | A shelter profile has the statuses Pending → Approved / Rejected. A Shelter Owner can log in; until the profile is Approved, the owner can only create, view, and edit their own profile. Animal and application operations return 403. | `docs/02-vision-boundary.md`, `docs/07-srs.md`, `api/openapi.yaml` (#40, #25) |
-| K3 | Rejected shelters | A Rejected shelter cannot apply again. This is not part of the Sprint 2 scope. | `docs/07-srs.md` |
+| K2 | Shelter registration statuses (closes OI-04) | A shelter profile has the statuses Pending → Approved / Rejected. A Shelter Owner can log in; until the profile is Approved, the owner can only create, view, and edit their own profile. Animal and application operations return 403. | `docs/02-vision-boundary.md`, `docs/07-srs.md`, `api/openapi.yaml` (#58, #40, #25) |
+| K3 | Rejected shelters | A Rejected shelter cannot submit a new registration request; re-application is out of the current scope. | `docs/07-srs.md` |
 | K4 | File names | `docs/06-architecture.md` (Işıl), `docs/07-srs.md` (İlayda), `docs/08-nfr.md` (İlayda and Efekan), `docs/09-ui-ux.md` (Fatma) | All Sprint 2 documents |
-| K6 | SRS | The SRS follows a simplified ISO/IEC/IEEE 29148 structure. FR-01 … FR-21 are final, and every FR references its source user story. | `docs/07-srs.md` (#55) |
+| K6 | SRS | The SRS follows a simplified ISO/IEC/IEEE 29148 structure. FR-01 – FR-21 follow the official requirements list (`docs/02-vision-boundary.md`, Section 5); every FR references its source user story. | `docs/07-srs.md` (#55) |
 | K7 | Figma prototypes | The screen list follows the OpenAPI contract. Confirmation dialogs and automatic-rejection warnings are included; there are no dashboard or user profile screens. `GET /admin/users` is added to PR #25. | Figma, `docs/09-ui-ux.md`, `api/openapi.yaml` (#25) |
 | K8 | Deployment | Only Nginx (port 80) is exposed. Requests to `/api/` are forwarded to FastAPI. Backend and MySQL ports are not exposed. Secrets are kept in a `.env` file; only `.env.example` is committed. MySQL uses a named volume. | Deployment plan, `docs/06-architecture.md` |
 | K9 | Access token | Access token lifetime is 30 minutes; there is no refresh token. After expiry the API returns 401 and the user logs in again. | `docs/08-nfr.md` (#52), `api/openapi.yaml` (`expiresIn: 1800`) |
@@ -32,10 +32,10 @@ Decision numbers follow the team's list; K5 (calendar) is intentionally not used
 
 | Task | Location | Target |
 |---|---|---|
-| Domain model | `docs/06-architecture.md` | 18 Nov |
+| Domain model | `docs/06-architecture.md` (PR #54) | Done |
 | Complete architecture document (ADRs, C4, database schema, UML, traceability) | `docs/06-architecture.md` (#53, PR #54) | 21 Nov |
-| Admin account provisioning note (A-03) | `docs/03-api-flows.md` (#46) | 21 Nov |
-| Update A-05 and close OI-04 | `docs/02-vision-boundary.md` (#40) | 21 Nov |
+| Admin account provisioning note (A-03) | `docs/03-api-flows.md` (#58, PR #59) | Done |
+| Update A-05 and close OI-04 | `docs/02-vision-boundary.md` (#58, PR #59) | Done |
 | Reviews of PR #52 (NFR) and PR #25 (OpenAPI) | Pull request reviews | 19–20 Nov |
 | Cross-document consistency check | All documents | 22 Nov |
 
@@ -43,7 +43,7 @@ Decision numbers follow the team's list; K5 (calendar) is intentionally not used
 
 | Task | Location | Target |
 |---|---|---|
-| Add `GET /admin/users`, update FR tags, `expiresIn: 1800`, OpenAPI version 0.2.0 | `api/openapi.yaml` (PR #25, #19) | 20 Nov |
+| Add `GET /admin/users`, `expiresIn: 1800`, OpenAPI version 0.2.0 (the FR tags already match the official FR list and are not changed) | `api/openapi.yaml` (PR #25, #19) | 20 Nov |
 | Figma screens and user-flow diagrams | Figma | 21 Nov |
 | UI/UX document (Figma link, screen–endpoint mapping, flows, error screens, images) | `docs/09-ui-ux.md` | 21 Nov |
 
