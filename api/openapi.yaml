@@ -838,7 +838,7 @@ paths:
   /admin/users:
     get:
       tags: [Admin]
-      operationId: listAdminUsers
+      operationId: listUsers
       summary: List users (FR-06)
       description: >
         Admin only. Returns registered users.
