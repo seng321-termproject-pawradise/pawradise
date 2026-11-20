@@ -1414,7 +1414,11 @@ components:
         description:
           type: string
           example: A local animal shelter.
-
+        operatingHours:
+          type: string
+          description: Shelter operating hours.
+          example: Mon-Fri 09:00-17:00; Sat 10:00-14:00; Sun closed
+          
     ShelterProfileUpdate:
       type: object
       description: All fields are optional. Registration status cannot be changed through this schema.
@@ -1430,6 +1434,10 @@ components:
           type: string
         description:
           type: string
+        operatingHours:
+          type: string
+          description: Shelter operating hours.
+          example: Mon-Fri 09:00-17:00; Sat 10:00-14:00; Sun closed
 
     ShelterProfile:
       allOf:
