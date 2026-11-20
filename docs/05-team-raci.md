@@ -103,9 +103,13 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | Requirements Engineering | **A/R** | I | C | C | I | C |
 | Project Proposal | **A/R** | C | C | I | I | I |
+| Software Requirements Specification (SRS) | **A/R** | I | C | C | I | C |
+| Non-Functional Requirements | R | I | C | **A/R** | C | I |
 | System Vision and Boundary | C | I | **A/R** | C | I | C |
 | System Architecture | C | I | **A/R** | C | C | R |
 | OpenAPI Design | C | I | **A/R** | C | I | R |
+| UI/UX Design and User Flows (Figma) | C | I | C | C | I | **A/R** |
+| Deployment Planning | I | I | C | C | **A/R** | I |
 | Frontend Development | C | I | **A** | C | I | R |
 | Backend Development | C | I | **A** | C | C | R |
 | Quality Assurance | C | I | C | **A/R** | C | C |
@@ -126,7 +130,9 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
   monitoring, and defect tracking. *Testing* covers writing and running unit, integration, and end-to-end tests.
   Developers write unit tests for their own code (R).
 
-## 5. Sprint 1 Deliverable Ownership
+## 5. Deliverable Ownership
+
+### 5.1 Sprint 1
 
 | # | Deliverable | Accountable | Responsible | Location | Issue |
 |---|---|---|---|---|---|
@@ -140,6 +146,22 @@ The responsibilities cover the six areas required for Sprint 1: **product, proce
 | 8 | Review of acceptance criteria and API for testability | QA | QA | Pull request reviews and QA issues | #38, #39, #40, #41 |
 | 9 | Individual Contributions, Sprint 1 Release, and Submission | SM | SM | `CONTRIBUTIONS.md`, tag `sprint-1` | #13, #35 |
 
+### 5.2 Sprint 2
+
+Task assignment and decisions: [`docs/meetings/sprint-2-decision-log.md`](meetings/sprint-2-decision-log.md).
+
+| # | Deliverable | Accountable | Responsible | Location | Issue / PR |
+|---|---|---|---|---|---|
+| 1 | Software Requirements Specification | PO | PO | `docs/07-srs.md` | #55, #56 |
+| 2 | Non-Functional Requirements | QA | QA, PO | `docs/08-nfr.md` | #51, #52 |
+| 3 | Architecture Document (ADRs, C4, UML, database schema) | ARCH | ARCH | `docs/06-architecture.md` | #53, #54 |
+| 4 | Figma Prototypes, User Flows, and UI/UX Document | IMPL | IMPL | Figma, `docs/09-ui-ux.md` | – |
+| 5 | OpenAPI Update (admin and shelter operations, version 0.2.0) | ARCH | IMPL | `api/openapi.yaml` | #19, #25 |
+| 6 | Deployment Plan | DEVOPS | DEVOPS | Deployment plan | – |
+| 7 | Product Backlog Update and User Story Issues | PO | PO | `docs/04-backlog.md`, GitHub Issues | #39, #40 |
+| 8 | Sprint 2 Board, Decision Log, and RACI Update | SM | SM | Project board, `docs/meetings/`, `docs/05-team-raci.md` | – |
+| 9 | Individual Contributions, Sprint 2 Release, and Submission | SM | SM | `CONTRIBUTIONS.md`, tag `sprint-2` | – |
+
 ## 6. Approval
 
 This document was reviewed and accepted by all team members through its pull request.
@@ -147,3 +169,4 @@ This document was reviewed and accepted by all team members through its pull req
 | Version | Date | Change | Pull Request |
 |---|---|---|---|
 | 1.0 | 2026-11-03 | Initial team roles and RACI matrix | #17 |
+| 1.1 | 2026-11-19 | Sprint 2 activities and deliverable ownership | – |
