@@ -1074,7 +1074,7 @@ components:
             error: UNAUTHORIZED
             message: Authentication is required.
     Forbidden:
-      description: Insufficient permissions or banned user
+      description: Insufficient permissions, banned user, or shelter profile not Approved
       content:
         application/json:
           schema:
