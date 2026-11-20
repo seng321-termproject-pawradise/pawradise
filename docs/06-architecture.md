@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 1.1 |
+| Version | 1.2 |
 | Status | Ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
@@ -352,6 +352,7 @@ classDiagram
         +string contactEmail
         +string phone
         +string? description
+        +string? operatingHours
         +ShelterRegistrationStatus status
         +datetime createdAt
         +datetime updatedAt
@@ -464,7 +465,7 @@ Fields marked with `?` are optional (nullable).
 | Entity | Description | Related FR |
 |---|---|---|
 | User | Account of an Admin, Shelter Owner or Adopter. Stores the bcrypt password hash and the ban flag. | FR-01, FR-02, FR-06 |
-| ShelterProfile | Shelter information submitted by a Shelter Owner, with its registration status. | FR-03, FR-04, FR-07 |
+| ShelterProfile | Shelter information submitted by a Shelter Owner (contact details, description, operating hours), with its registration status. | FR-03, FR-04, FR-07 |
 | Animal | Animal listing of a shelter, with its current status and, after handover, its adopter. | FR-05, FR-08, FR-09, FR-12 – FR-15 |
 | AnimalImage | One public image URL of an animal. | FR-08 |
 | Application | Adoption application of an adopter for one animal. | FR-10, FR-11, FR-16 – FR-20 |
@@ -493,7 +494,7 @@ Fields marked with `?` are optional (nullable).
 2. **Fields not exposed by the API.** `passwordHash` is stored but never returned in any API response (NFR-02).
 3. **Lists stored as rows.** `Animal.imageUrls` and `Application.documents` are lists in the API; in the database each URL or document is one row (`AnimalImage`, `ApplicationDocument`).
 4. **Separate status history tables (ADR-07).** Animal and application status changes are stored in two tables, so each record has a foreign key to an existing animal or application. The API still returns a single `StatusChange` schema (`entityType`, `entityId`); the backend maps rows from both tables to it. Animals and applications are never hard-deleted, so the foreign keys do not block normal operations.
-5. **Nullable fields.** `ownerAdopterId` is empty until handover. `previousStatus` is empty for the first record of an entity (for example, `null → Pending`).
+5. **Nullable fields.** `ownerAdopterId` is empty until handover. `description`, `operatingHours` and `note` are optional texts. `previousStatus` is empty for the first record of an entity (for example, `null → Pending`).
 6. **BR-08 adoption limit.** When an application is approved, the animal becomes Reserved but `ownerAdopterId` stays empty; it is set only at handover (Reserved → Adopted). Therefore the limit of three animals is counted through the adopter's **Approved applications whose animal is Reserved or Adopted**, not through `ownerAdopterId` alone.
 
 ---
@@ -522,6 +523,7 @@ erDiagram
         varchar contact_email
         varchar phone
         text description "nullable"
+        varchar operating_hours "nullable"
         enum status "Pending, Approved, Rejected"
         datetime created_at
         datetime updated_at
