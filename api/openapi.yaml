@@ -118,7 +118,7 @@ paths:
               example:
                 accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3Iiwicm9sZSI6IkFET1BURVIifQ.signature
                 tokenType: Bearer
-                expiresIn: 3600
+                expiresIn: 1800
                 user:
                   id: 7
                   fullName: Ayse Yilmaz
@@ -1191,7 +1191,7 @@ components:
         expiresIn:
           type: integer
           description: Token lifetime in seconds
-          example: 3600
+          example: 1800
         user:
           $ref: '#/components/schemas/User'
 
