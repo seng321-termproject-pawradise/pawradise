@@ -3,10 +3,10 @@
 | Item | Value |
 |------|-------|
 | Project | Pawradise – Animal Shelter & Adoption System |
-| Sprint | Sprint 1 (November 2026) |
+| Sprint | Sprint 1, updated in Sprint 2 (November 2026) |
 | Document Owner | Software Architect |
 | Status | Draft – pending team review |
-| API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.1.0) |
+| API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.1.1) |
 
 > This document explains how the operations in `api/openapi.yaml` work together in the main user journeys. It does not add, remove, or change any requirement. Requirement IDs refer to the Official Requirements Reference for Sprint 1.
 
@@ -61,6 +61,12 @@ sequenceDiagram
     U->>API: POST /auth/logout (Bearer token)
     API-->>U: 204 No Content
 ```
+
+**Notes**
+
+- Public registration accepts only the roles `ADOPTER` and `SHELTER_OWNER`. Admin accounts are not created through `registerUser`; they are created by a seed step when the system is deployed and log in through `loginUser` like other users (A-03, `docs/06-architecture.md` Section 10.2).
+- The access token is valid for 30 minutes and there is no refresh token. After expiry, protected operations return 401 and the user logs in again (decision K9).
+- On logout, the client discards the token (`docs/06-architecture.md`, ADR-05).
 
 ---
 
