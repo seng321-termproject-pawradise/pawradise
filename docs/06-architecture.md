@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 1.2 |
+| Version | 1.3 |
 | Status | Ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
@@ -308,7 +308,7 @@ flowchart TB
 | Auth Router | Router | Registration, login and logout endpoints | `registerUser`, `loginUser`, `logoutUser` | FR-01 |
 | Animals Router | Router | Animal listing, detail, create, update, archive, handover and status history endpoints | `listAnimals`, `getAnimal`, `createAnimal`, `updateAnimal`, `archiveAnimal`, `recordHandover`, `getAnimalStatusHistory` | FR-05, FR-08, FR-09, FR-12 – FR-15, FR-21 |
 | Applications Router | Router | Application endpoints for adopters and shelter owners | `submitApplication`, `listApplications`, `getApplication`, `withdrawApplication`, `approveApplication`, `rejectApplication` | FR-10, FR-11, FR-16 – FR-20 |
-| Shelters Router | Router | Shelter profile endpoints of the current shelter owner | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` | FR-07 |
+| Shelters Router | Router | Shelter profile endpoints of the current shelter owner | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` | FR-03, FR-07 |
 | Admin Router | Router | Shelter registration review and user management endpoints (Admin only) | `listShelterRegistrationRequests`, `approveShelterRegistration`, `rejectShelterRegistration`, `listUsers` (being added in PR #25), `banUser`, `unbanUser` | FR-03, FR-04, FR-06 |
 | Security Dependencies | Cross-cutting | Verifies the JWT, loads the current user, checks the role, rejects banned users where required (BR-07) and requires an Approved shelter profile for shelter operations (K2). Returns 401 or 403. | All protected operations | FR-02, NFR-03 |
 | Auth Service | Service | Creates users with bcrypt password hashes, verifies credentials, issues 30-minute JWT access tokens | – | FR-01, NFR-02 |
@@ -818,7 +818,7 @@ Only Pending applications can change status; Approved, Rejected and Withdrawn ar
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> Pending: createShelterProfile (FR-07)
+    [*] --> Pending: createShelterProfile (FR-03, FR-07)
     Pending --> Approved: approveShelterRegistration (FR-04)
     Pending --> Rejected: rejectShelterRegistration (FR-04)
     Approved --> [*]
@@ -900,7 +900,7 @@ Each functional requirement (official list FR-01 – FR-21, see `docs/02-vision-
 |---|---|---|---|---|---|
 | FR-01 | Register, log in and log out | Auth Router | Auth Service | `registerUser`, `loginUser`, `logoutUser` | `users` |
 | FR-02 | Role-based access control | All routers | Security Dependencies | All protected operations | `users`, `shelter_profiles` |
-| FR-03 | View shelter registration requests | Admin Router | Shelter Service | `listShelterRegistrationRequests` | `shelter_profiles` |
+| FR-03 | Shelter registration requests (submitted by the Shelter Owner, viewed by the Admin) | Shelters Router, Admin Router | Shelter Service | `createShelterProfile`, `listShelterRegistrationRequests` | `shelter_profiles` |
 | FR-04 | Approve or reject shelter registration requests | Admin Router | Shelter Service | `approveShelterRegistration`, `rejectShelterRegistration` | `shelter_profiles` |
 | FR-05 | Remove or archive inappropriate listings | Animals Router | Animal Service, History Service | `archiveAnimal` | `animals`, `animal_status_history` |
 | FR-06 | Ban or unban users (BR-07) | Admin Router | User Service, Application Service, History Service | `listUsers`, `banUser`, `unbanUser` | `users`, `applications`, `application_status_history` |
