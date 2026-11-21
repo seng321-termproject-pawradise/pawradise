@@ -54,7 +54,7 @@ The system operates as a containerized, API-first web application backed by an A
 
 ### 2.3 Assumptions and Dependencies
 This SRS incorporates the baseline assumptions **`A-01` through `A-09`** documented in `docs/02-vision-boundary.md` and `docs/01-proposal.md` §7:
-- **A-01:** Access via modern web browsers over HTTPS.
+- **A-01:** Access via modern web browsers.
 - **A-02:** Animal images are stored as external HTTP/HTTPS URLs (`AnimalImage` table, exposed as `imageUrls` in API); binary file uploads are out of scope.
 - **A-03:** Admin accounts are provisioned/seeded rather than publicly registered.
 - **A-04 & Decision K2 (Closes OI-04):** Shelter Owners must have an Admin-approved shelter profile (`ShelterProfile.status == Approved`) before performing `FR-08`–`FR-12`, `FR-19`, and `FR-20` (`403 Forbidden` otherwise).
@@ -136,8 +136,8 @@ This SRS incorporates the baseline assumptions **`A-01` through `A-09`** documen
 - **Source User Story:** `US-06`
 - **Actor:** Shelter Owner (`SHELTER_OWNER`)
 - **Preconditions:** Authenticated `SHELTER_OWNER` with valid JWT.
-- **Requirement:** The system **shall** allow a Shelter Owner to retrieve (`getMyShelterProfile`) and update (`updateMyShelterProfile`) their `ShelterProfile` attributes, including `name`, `address`, `contactEmail`, `phone`, optional `operatingHours`, and optional `description`, updating `updatedAt`.
-- **Postconditions & Error Handling:** Returns `200 OK` with the `ShelterProfile` details.
+- **Requirement:** The system **shall** allow a Shelter Owner to create (`createShelterProfile`), retrieve (`getMyShelterProfile`), and update (`updateMyShelterProfile`) their `ShelterProfile` attributes, including `name`, `address`, `contactEmail`, `phone`, optional `operatingHours`, and optional `description`, updating `updatedAt`.
+- **Postconditions & Error Handling:** Returns `201 Created` on profile creation or `200 OK` with the `ShelterProfile` details on retrieval/update.
 
 #### FR-08: Create Animal Listing via Image URL
 - **Source User Story:** `US-07`
@@ -260,7 +260,7 @@ This SRS incorporates the baseline assumptions **`A-01` through `A-09`** documen
 | **FR-04** | Admin Shelter Approval / Rejection | `US-03` | Admin | Grants `Approved` Status | `approveShelterRegistration`, `rejectShelterRegistration` |
 | **FR-05** | Admin Animal Listing Moderation | `US-05` | Admin | No (Admin Role) | `archiveAnimal` |
 | **FR-06** | Admin User Ban / Unban (`BR-07`) | `US-04` | Admin | No (Admin Role) | `banUser`, `unbanUser`, `listUsers` |
-| **FR-07** | Shelter Profile Management (`operatingHours`) | `US-06` | Shelter Owner | No | `getMyShelterProfile`, `updateMyShelterProfile` |
+| **FR-07** | Shelter Profile Management (`operatingHours`) | `US-06` | Shelter Owner | No | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile` |
 | **FR-08** | Create Animal Listing (Image URL) | `US-07` | Shelter Owner | **Yes (`Approved` required)** | `createAnimal` |
 | **FR-09** | Update (`PATCH`) & Archive Listing | `US-08` | Shelter Owner | **Yes (`Approved` required)** | `updateAnimal`, `archiveAnimal` |
 | **FR-10** | View & Inspect Shelter Applications | `US-14` | Shelter Owner | **Yes (`Approved` required)** | `listApplications`, `getApplication` |
