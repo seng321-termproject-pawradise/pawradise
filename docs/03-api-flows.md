@@ -6,7 +6,7 @@
 | Sprint | Sprint 1, updated in Sprint 2 (November 2026) |
 | Document Owner | Software Architect |
 | Status | Draft – pending team review |
-| API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.1.1) |
+| API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.2.0) |
 
 > This document explains how the operations in `api/openapi.yaml` work together in the main user journeys. It does not add, remove, or change any requirement. Requirement IDs refer to the Official Requirements Reference for Sprint 1.
 
@@ -23,7 +23,7 @@
 | F5 | Record handover | Shelter Owner | `recordHandover` | FR-12, BR-04, BR-09 |
 | F6 | Withdraw an application | Adopter | `withdrawApplication` | FR-18, BR-03 |
 | F7 | Reject or archive | Shelter Owner, Admin | `rejectApplication`, `archiveAnimal` | FR-05, FR-09, FR-11 |
-| F8 | Ban an adopter (planned operation) | Admin | Not yet in OpenAPI 0.1.0 | FR-06, BR-07, BR-09 |
+| F8 | Ban an adopter | Admin | `listUsers`, `banUser` | FR-06, BR-07, BR-09 |
 
 **Common rules for all flows**
 
@@ -255,9 +255,9 @@ Both operations record the change in the status history (BR-09).
 
 ---
 
-## 9. F8 – Ban an Adopter (Planned Operation)
+## 9. F8 – Ban an Adopter
 
-> The Admin ban and unban operations (FR-06) are **not yet defined** in `api/openapi.yaml` version 0.1.0. This section documents the agreed behavior (team decision on BR-07) so that the future endpoint can be designed consistently. No endpoint path is defined here.
+The Admin finds the user with `listUsers` and bans them with `banUser` (FR-06). Unbanning (`unbanUser`) only sets `banned = false`; applications rejected by the ban are not restored.
 
 ```mermaid
 sequenceDiagram
@@ -265,14 +265,21 @@ sequenceDiagram
     participant API as Pawradise API
     participant DB as Database
 
-    AD->>API: Ban adopter (planned operation, FR-06)
-    API->>DB: BEGIN TRANSACTION
-    API->>DB: Lock the adopter row
-    API->>DB: Set adopter banned = true
-    API->>DB: All Pending applications of the adopter → Rejected (BR-07)
-    API->>DB: Record every status change (BR-09)
-    API->>DB: COMMIT
-    API-->>AD: Success
+    AD->>API: GET /admin/users?role=ADOPTER
+    API-->>AD: 200 OK [User]
+
+    AD->>API: POST /admin/users/{userId}/ban
+    alt User does not exist
+        API-->>AD: 404 Not Found
+    else User exists
+        API->>DB: BEGIN TRANSACTION
+        API->>DB: Lock the adopter row
+        API->>DB: Set adopter banned = true
+        API->>DB: All Pending applications of the adopter → Rejected (BR-07)
+        API->>DB: Record every status change (BR-09, changedBy = Admin)
+        API->>DB: COMMIT
+        API-->>AD: 200 OK {user, autoRejectedApplicationIds}
+    end
     Note over API,DB: Approved applications are not changed.
 ```
 
