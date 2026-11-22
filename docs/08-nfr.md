@@ -11,8 +11,7 @@ This document defines measurable quality targets and planned verification
 methods. It does not report executed tests or achieved results.
 
 Existing NFR identifiers retain their meanings. Requirements not covered
-here remain applicable. NFR-10 is a proposed addition whose identifier
-must be confirmed before approval.
+here remain applicable. NFR-10 is an approved addition for deployment portability.
 
 The architectural decisions supplied for this draft are bcrypt password
 hashing, JWT authentication, row-level locking during approval, and
@@ -20,7 +19,7 @@ Docker Compose deployment. Their implementation must be verified.
 
 ## 2. Common Test Conditions
 
-Proposed reference environment:
+Approved reference environment:
 - Application and database: Docker Compose.
 - Available resources: at least 2 CPU cores and 4 GB RAM.
 - Record the OS, hardware, Docker version, image versions, and commit SHA.
@@ -28,7 +27,6 @@ Proposed reference environment:
 - Use a clean database or reset fixtures between independent scenarios.
 - Do not store real passwords, signing keys, or personal data in evidence.
 
-The architect and DevOps engineer must confirm the reference environment.
 Performance results from different environments must not be treated as
 directly equivalent.
 
@@ -85,8 +83,7 @@ Evidence: k6 summary, Playwright results, environment details, and SHA.
 - Plaintext passwords shall not appear in application logs.
 - Equal passwords assigned to different accounts shall produce
   different hashes, while both remain verifiable.
-- Proposed bcrypt work factor: 12, pending architect approval and
-  measurement on the reference environment.
+- Approved bcrypt work factor: 12.
 
 ### Verification
 
@@ -114,13 +111,10 @@ Evidence: test report and redacted inspection results.
   shall receive 403, consistent with the API contract.
 - Failed authorization shall cause no protected data modification
   or disclosure.
-- Proposed access-token lifetime: 30 minutes.
-- Proposed configuration: ACCESS_TOKEN_EXPIRE_MINUTES=30.
+- Access-token lifetime: 30 minutes.
+- Configuration: ACCESS_TOKEN_EXPIRE_MINUTES=30.
 - Issued tokens shall contain iat and exp, with exp - iat = 1,800 seconds.
-- Tokens shall be rejected at or after exp when clock tolerance is zero.
-
-Any nonzero clock tolerance must be explicitly agreed, documented, and
-included in the boundary tests.
+- Clock tolerance is 0 seconds. Tokens shall be rejected at or after exp.
 
 ### Verification
 
@@ -143,14 +137,17 @@ cases match the expected responses and database effects.
 
 Evidence: test matrix and redacted test results.
 
-### Open decisions
+### Confirmed session behavior
 
-The team must confirm the proposed 30-minute access-token lifetime.
-Refresh tokens are not supported. After the access token expires,
-the user must log in again to obtain a new access token.
+Decision K9 confirms a 30-minute access-token lifetime.
+Configuration: ACCESS_TOKEN_EXPIRE_MINUTES=30.
+The API expiresIn value is 1,800 seconds.
 
-After agreement, align configuration, API expiresIn examples, and
-documentation. A 30-minute token corresponds to 1,800 seconds.
+Refresh tokens are not supported. After expiry, protected operations
+return 401 and the user must log in again.
+
+JWT signing uses JWT_SECRET. Real signing keys must not be committed
+or included in test evidence.
 
 ## 6. NFR-08 — Concurrent Approval Consistency
 
@@ -189,7 +186,7 @@ are insufficient evidence of consistency.
 
 Evidence: concurrency results, SQL assertions, and test fixtures.
 
-## 7. NFR-10 — Deployment Portability (Proposed)
+## 7. NFR-10 — Deployment Portability
 
 ### Target
 
@@ -224,13 +221,11 @@ Evidence: deployment checklist and results from both operating systems.
 
 ## 8. Decisions Required Before Approval
 
-- Confirm performance load, reference hardware, and page-test conditions.
-- Confirm bcrypt work factor.
-- Confirm access-token lifetime and clock tolerance.
-- Confirm supported deployment environments.
-- Confirm the proposed NFR-10 identifier.
-- Identify the purpose of any APP_KEY setting before defining its
-  security requirements.
+- Confirm the proposed API performance load and thresholds.
+- Confirm the standard-page list, browser versions, network conditions,
+  and external-image behavior for page-loading tests.
+- Confirm the supported deployment operating systems.
+- Confirm the deployment health-check and startup procedure with DevOps.
 
 Owner: Quality Assurance Engineer.
 Reviewers: Software Architect, DevOps Engineer, and Product Owner.
