@@ -149,6 +149,42 @@ return 401 and the user must log in again.
 JWT signing uses JWT_SECRET. Real signing keys must not be committed
 or included in test evidence.
 
+## NFR-05 — Consistent Error Handling and User Feedback
+
+### Target
+
+All API error responses shall follow the shared ErrorResponse schema:
+- status: integer matching the HTTP response status.
+- error: non-empty error code.
+- message: non-empty, understandable explanation.
+
+Errors shall not expose passwords, JWT signing keys, database credentials,
+SQL queries, or stack traces.
+
+The UI shall display an understandable outcome for successful and failed
+operations. An unsuccessful operation shall not display a success message.
+
+### Verification
+
+Tools: pytest integration tests, Postman/Newman, and Playwright.
+
+Create an endpoint-to-error-case matrix covering every documented error
+response in the OpenAPI contract, including 400, 401, 403, 404, 409 and 422
+where applicable. Validate the HTTP status, body schema and message.
+
+Use controlled failures in the test environment to check that unexpected
+server errors do not expose implementation details.
+
+For each implemented user flow, test one successful operation and each
+distinct user-visible failure outcome. Verify that feedback matches the
+actual API result.
+
+Pass criterion: every case in the agreed matrix passes, with no sensitive
+information exposed in the inspected responses.
+
+Evidence: case matrix, automated test report and UI screenshots.
+Execution status: Not executed.
+
 ## 6. NFR-08 — Concurrent Approval Consistency
 
 ### Target
@@ -185,6 +221,51 @@ Inspect final database state after every run. HTTP responses alone
 are insufficient evidence of consistency.
 
 Evidence: concurrency results, SQL assertions, and test fixtures.
+
+## NFR-09 — Status History and Audit Trail
+
+### Target
+
+Every committed Animal or Application status transition shall create
+exactly one corresponding history record containing:
+- The affected entity identifier.
+- The responsible user ID (changedBy).
+- previousStatus and newStatus.
+- A UTC timestamp (changedAt).
+
+previousStatus may be null for initial creation.
+
+Automatic rejection after approval shall record the approving shelter
+owner. Automatic rejection caused by a ban shall record the banning admin.
+
+Status changes and their history records shall commit in the same
+transaction. Rolled-back operations shall leave neither a status change
+nor a corresponding committed history record.
+
+History records shall not be editable or deletable through the API.
+History access shall respect the documented role and ownership rules.
+
+### Verification
+
+Tools: pytest integration tests, SQL assertions and Postman/Newman.
+
+Cover creation, approval, automatic rejection, manual rejection,
+withdrawal, handover and archiving, plus rejection caused by a ban.
+
+For each transition, compare the database and API history with the
+expected actor, entity, old status and new status. Check that changedAt
+falls within the operation interval measured by the controlled test clock.
+
+Inject a failure before transaction commit and verify rollback of both
+business data and history. Test unauthorized history access and confirm
+that no API operation permits history modification or deletion.
+
+Pass criterion: all tested transitions have the expected history record;
+zero missing, duplicate or incorrectly attributed records; all rollback
+and access-control checks pass.
+
+Evidence: transition matrix, test report and redacted SQL assertion results.
+Execution status: Not executed.
 
 ## 7. NFR-10 — Deployment Portability
 
