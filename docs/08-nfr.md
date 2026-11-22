@@ -185,6 +185,69 @@ information exposed in the inspected responses.
 Evidence: case matrix, automated test report and UI screenshots.
 Execution status: Not executed.
 
+## NFR-06 and NFR-07 — Browser Compatibility and Responsive UI
+
+### Scope
+
+The interface shall support commonly used browsers and remain usable
+on desktop, tablet and mobile screens.
+
+The browser and viewport matrix below is proposed for team approval.
+These are planned verification conditions, not completed test results.
+
+### Proposed measurable targets
+
+Browser matrix:
+- Google Chrome, Microsoft Edge and Mozilla Firefox on Windows.
+- Safari on macOS.
+- Record the exact browser and operating-system versions at execution.
+
+Viewport matrix, in CSS pixels:
+- Mobile: 360 × 800.
+- Tablet: 768 × 1024.
+- Desktop: 1440 × 900.
+
+For each browser at the desktop viewport, all agreed critical user-flow
+tests shall pass without browser-specific functional failures.
+
+For each viewport:
+- Required content and controls shall remain visible and accessible.
+- Text and controls shall not overlap or be clipped.
+- The page shall not require horizontal scrolling.
+- Wide tables may scroll within their own clearly accessible container.
+- Forms, validation messages and confirmation dialogs shall remain usable.
+- Navigation shall allow users to reach every authorized screen.
+
+### Verification
+
+Tools: Playwright, browser developer tools and manual browser testing.
+
+Test the following flows with authorized synthetic accounts:
+- Login and logout.
+- Browse and filter animals.
+- View animal details and submit an application.
+- Track and withdraw an application.
+- Review applications and approve or reject them.
+- Manage animal listings and record handover.
+- Review shelter registrations and ban or unban users.
+
+Run the applicable flows on each desktop browser. Repeat the flows at
+all three viewport sizes using Playwright's Chromium, Firefox and WebKit
+engines.
+
+WebKit automation supports compatibility testing but does not replace
+the manual test on an actual Safari browser.
+
+Inspect every implemented screen for clipping, overlap, overflow,
+unreachable controls and unusable dialogs at each viewport.
+
+Pass criterion: 100% of the agreed flow and layout checks pass across
+the approved matrix. Any unavailable browser environment is recorded
+as Not executed, rather than Passed.
+
+Evidence: browser/version matrix, test report, screenshots and defect links.
+Execution status: Not executed.
+
 ## 6. NFR-08 — Concurrent Approval Consistency
 
 ### Target
@@ -307,6 +370,8 @@ Evidence: deployment checklist and results from both operating systems.
   and external-image behavior for page-loading tests.
 - Confirm the supported deployment operating systems.
 - Confirm the deployment health-check and startup procedure with DevOps.
+- Confirm the browser, operating-system and viewport matrix for
+  NFR-06/NFR-07 compatibility and responsive-layout testing.
 
 Owner: Quality Assurance Engineer.
 Reviewers: Software Architect, DevOps Engineer, and Product Owner.
