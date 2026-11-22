@@ -221,8 +221,10 @@ paths:
       operationId: createAnimal
       summary: Add an animal listing (FR-08)
       description: >
-        Shelter Owner only. Images are provided as image URLs; direct file
-        upload is out of scope. A new listing starts with status Available.
+         Shelter Owner only. The owner's shelter profile must be Approved;
+        otherwise the request returns 403 Forbidden. Images are provided as
+        image URLs; direct file upload is out of scope. A new listing starts
+        with status Available.
       requestBody:
         required: true
         content:
@@ -863,8 +865,7 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
-          $ref: '#/components/responses/Forbidden'
-          
+          $ref: '#/components/responses/Forbidden'      
   /admin/shelters/requests:
     get:
       tags: [Admin]
