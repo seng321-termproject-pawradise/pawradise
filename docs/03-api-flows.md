@@ -23,7 +23,8 @@
 | F5 | Record handover | Shelter Owner | `recordHandover` | FR-12, BR-04, BR-09 |
 | F6 | Withdraw an application | Adopter | `withdrawApplication` | FR-18, BR-03 |
 | F7 | Reject or archive | Shelter Owner, Admin | `rejectApplication`, `archiveAnimal` | FR-05, FR-09, FR-11 |
-| F8 | Ban an adopter | Admin | `listUsers`, `banUser` | FR-06, BR-07, BR-09 |
+| F8 | Ban or unban a user | Admin | `listUsers`, `banUser`, `unbanUser` | FR-06, BR-07, BR-09 |
+| F9 | Shelter registration and profile management | Shelter Owner, Admin | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile`, `listShelterRegistrationRequests`, `approveShelterRegistration`, `rejectShelterRegistration` | FR-03, FR-04, FR-07, K2, K3 |
 
 **Common rules for all flows**
 
@@ -255,7 +256,7 @@ Both operations record the change in the status history (BR-09).
 
 ---
 
-## 9. F8 – Ban an Adopter
+## 9. F8 – Ban or Unban a User
 
 The Admin finds the user with `listUsers` and bans them with `banUser` (FR-06). Unbanning (`unbanUser`) only sets `banned = false`; applications rejected by the ban are not restored.
 
@@ -285,7 +286,54 @@ sequenceDiagram
 
 Because the ban locks the same adopter row as the approval transaction (F3, F4), a ban and an approval for the same adopter cannot interleave: either the approval finishes first, or the application is already Rejected and the approval returns 409.
 
-## 10. Status Transitions Summary
+## 10. F9 – Shelter Registration and Profile Management
+
+A Shelter Owner registers an account (F1), logs in and submits the shelter profile, which starts with status Pending. An Admin reviews the request and approves or rejects it (FR-03, FR-04, FR-07; decisions K2 and K3).
+
+```mermaid
+sequenceDiagram
+    actor SO as Shelter Owner
+    actor AD as Admin
+    participant API as Pawradise API
+    participant DB as Database
+
+    SO->>API: POST /shelters {name, address, contactEmail, phone, operatingHours?, description?}
+    alt Profile already exists
+        API-->>SO: 409 Conflict
+    else No profile yet
+        API->>DB: Save shelter profile (status = Pending)
+        API-->>SO: 201 Created (ShelterProfile)
+    end
+
+    SO->>API: GET /shelters/me
+    API-->>SO: 200 OK (ShelterProfile, status Pending)
+
+    SO->>API: POST /animals (any animal or application operation)
+    API-->>SO: 403 Forbidden (shelter profile not Approved, K2)
+
+    AD->>API: GET /admin/shelters/requests
+    API-->>AD: 200 OK [ShelterProfile] (Pending requests)
+
+    alt Admin approves
+        AD->>API: POST /admin/shelters/{shelterId}/approve
+        API->>DB: Pending → Approved
+        API-->>AD: 200 OK
+    else Admin rejects
+        AD->>API: POST /admin/shelters/{shelterId}/reject
+        API->>DB: Pending → Rejected
+        API-->>AD: 200 OK
+    end
+    Note over API: Approving or rejecting a profile that is not Pending returns 409.
+
+    SO->>API: PATCH /shelters/me {contact details, operatingHours}
+    API->>DB: Update profile
+    API-->>SO: 200 OK (ShelterProfile)
+```
+
+- A Shelter Owner can create, view and update their own profile in every status. Animal and application operations are allowed only when the profile is **Approved** (K2).
+- A rejected shelter cannot submit a new registration request in the current scope (K3).
+
+## 11. Status Transitions Summary
 
 ```mermaid
 stateDiagram-v2
@@ -308,3 +356,14 @@ stateDiagram-v2
         Pending --> Withdrawn: withdrawApplication
     }
 ```
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Shelter registration" as Shelter {
+        [*] --> Pending: createShelterProfile
+        Pending --> Approved: approveShelterRegistration
+        Pending --> Rejected: rejectShelterRegistration
+    }
+```
+
