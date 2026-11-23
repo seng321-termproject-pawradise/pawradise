@@ -223,8 +223,9 @@ paths:
       description: >
         Shelter Owner only. The owner's shelter profile must be Approved;
         otherwise the request returns 403 Forbidden. Images are provided as
-        image URLs; direct file upload is out of scope. A new listing starts
-        with status Available.
+        HTTP or HTTPS image URLs; other schemes (for example `ftp://`) are
+        rejected with 400. Direct file upload is out of scope. A new listing
+        starts with status Available.
       requestBody:
         required: true
         content:
@@ -535,6 +536,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationDetail'
+              example:
+                id: 1048
+                animalId: 42
+                adopterId: 7
+                livesInApartment: true
+                documents:
+                  - type: APARTMENT_PERMISSION
+                    url: https://docs.example.com/ayse/apartment-permission.pdf
+                note: I have experience with dogs.
+                status: Approved
+                createdAt: '2026-11-10T10:15:00Z'
+                updatedAt: '2026-11-12T14:30:00Z'
+                statusHistory:
+                  - id: 500
+                    entityType: APPLICATION
+                    entityId: 1048
+                    previousStatus: null
+                    newStatus: Pending
+                    changedBy: 7
+                    changedAt: '2026-11-10T10:15:00Z'
+                  - id: 501
+                    entityType: APPLICATION
+                    entityId: 1048
+                    previousStatus: Pending
+                    newStatus: Approved
+                    changedBy: 3
+                    changedAt: '2026-11-12T14:30:00Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -560,6 +588,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Application'
+              example:
+                id: 1049
+                animalId: 42
+                adopterId: 8
+                livesInApartment: false
+                documents: []
+                status: Withdrawn
+                createdAt: '2026-11-10T11:00:00Z'
+                updatedAt: '2026-11-11T09:20:00Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -713,6 +750,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Application'
+              example:
+                id: 1052
+                animalId: 42
+                adopterId: 9
+                livesInApartment: true
+                documents:
+                  - type: APARTMENT_PERMISSION
+                    url: https://docs.example.com/mert/apartment-permission.pdf
+                status: Rejected
+                createdAt: '2026-11-10T12:30:00Z'
+                updatedAt: '2026-11-11T16:45:00Z'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -1248,6 +1296,8 @@ components:
           items:
             type: string
             format: uri
+            pattern: '^https?://'
+            description: Must be an HTTP or HTTPS URL (US-07).
           example: ["https://images.example.com/animals/pamuk-1.jpg"]
 
     AnimalUpdate:
@@ -1273,6 +1323,8 @@ components:
           items:
             type: string
             format: uri
+            pattern: '^https?://'
+            description: Must be an HTTP or HTTPS URL (US-07).
 
     Animal:
       allOf:

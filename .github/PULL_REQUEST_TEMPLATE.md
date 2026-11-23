@@ -1,4 +1,4 @@
-## Description
+## Summary
 Briefly describe the changes made in this pull request.
 
 ## Related Issue
@@ -16,7 +16,7 @@ Closes #
 -
 -
 
-## Testing and Verification
+## Testing / Validation
 Describe how the changes were tested or verified.
 
 ## Checklist
@@ -33,3 +33,10 @@ Attach screenshots or provide evidence links if applicable.
 
 ## Additional Notes
 Add any relevant information for reviewers.
+
+## Reviewer
+Requested reviewer: @username
+
+Select at least one team member in the GitHub Reviewers field.
+Writing a username here does not replace a formal review request.
+At least one approval is required before merging.
