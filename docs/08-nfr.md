@@ -1,6 +1,6 @@
 # Non-Functional Requirements and Verification Plan
 
-## 1. Status and Scope
+## Status and Scope
 
 Status: Draft for team review.
 First draft date: 18 November 2026.
@@ -17,7 +17,7 @@ The architectural decisions supplied for this draft are bcrypt password
 hashing, JWT authentication, row-level locking during approval, and
 Docker Compose deployment. Their implementation must be verified.
 
-## 2. Common Test Conditions
+## Common Test Conditions
 
 Approved reference environment:
 - Application and database: Docker Compose.
@@ -30,7 +30,7 @@ Approved reference environment:
 Performance results from different environments must not be treated as
 directly equivalent.
 
-## 3. NFR-01 — Performance
+## NFR-01 — Performance
 
 ### Existing requirement
 
@@ -72,7 +72,7 @@ replace it.
 
 Evidence: k6 summary, Playwright results, environment details, and SHA.
 
-## 4. NFR-02 — Password Storage Security
+## NFR-02 — Password Storage Security
 
 ### Target
 
@@ -101,7 +101,7 @@ are observed in the tested flows.
 
 Evidence: test report and redacted inspection results.
 
-## 5. NFR-03 — Authentication and Authorization
+## NFR-03 — Authentication and Authorization
 
 ### Target
 
@@ -148,6 +148,65 @@ return 401 and the user must log in again.
 
 JWT signing uses JWT_SECRET. Real signing keys must not be committed
 or included in test evidence.
+
+## NFR-04 — Usability
+
+### Official requirement
+
+The system shall provide a simple and user-friendly interface.
+
+### Measurable targets
+
+For each critical flow, at least 4 out of 5 test users shall complete
+the task without assistance:
+- Registration and login.
+- Submitting an adoption application.
+- Approving an adoption application.
+- Submitting a shelter profile for registration review.
+
+Before withdrawal, archiving, approval, rejection or banning, the UI
+shall display a confirmation dialog explaining the action and its
+consequences. Cancelling shall leave the affected data unchanged.
+
+Navigation labels, placement and behavior shall remain consistent
+across screens within each role. Role-specific options may differ
+according to permissions.
+
+The interface shall follow the agreed designs in docs/09-ui-ux.md.
+
+### Verification
+
+Tools: moderated usability sessions, an observation checklist,
+screen recordings with participant consent, and Playwright UI tests.
+
+Use five representative test users and synthetic data. Provide each
+user with the appropriate role and prerequisites for each task.
+Give the same task instructions without explaining the interface.
+
+For each user and flow, record:
+- Whether the task was completed correctly.
+- Whether assistance was needed.
+- Errors, abandonment and completion time.
+
+A task requiring a hint or intervention counts as assisted.
+Completion time is recorded for analysis; no time threshold is imposed.
+
+Pass criterion: at least 4 of 5 users complete each flow correctly
+without assistance. Results shall not be averaged across flows.
+
+Test confirmation and cancellation for every listed action.
+Verify that cancellation sends no mutation request and changes no data.
+For approval and banning, check that the dialog explains automatic
+rejection of affected pending applications.
+
+Inspect navigation across every implemented screen against the
+agreed UI/UX designs.
+
+Pass criterion: all confirmation, cancellation and navigation checks pass.
+
+Evidence: anonymized usability results, checklist, UI test report
+and screenshots.
+Execution status: Not executed.
 
 ## NFR-05 — Consistent Error Handling and User Feedback
 
@@ -248,12 +307,13 @@ as Not executed, rather than Passed.
 Evidence: browser/version matrix, test report, screenshots and defect links.
 Execution status: Not executed.
 
-## 6. NFR-08 — Concurrent Approval Consistency
+## NFR-08 — Concurrent Approval Consistency
 
 ### Target
 
 Approval shall be atomic and preserve the documented business rules.
-Row-level locking is the proposed implementation mechanism.
+Row-level locking is the agreed architectural mechanism.
+Its implementation must be verified.
 
 For one Available animal with 20 eligible Pending applications:
 - Submit 20 concurrent approval requests.
@@ -330,7 +390,7 @@ and access-control checks pass.
 Evidence: transition matrix, test report and redacted SQL assertion results.
 Execution status: Not executed.
 
-## 7. NFR-10 — Deployment Portability
+## NFR-10 — Deployment Portability
 
 ### Target
 
@@ -363,7 +423,7 @@ results. Never reset shared or production data for this test.
 
 Evidence: deployment checklist and results from both operating systems.
 
-## 8. Decisions Required Before Approval
+## Decisions Required Before Approval
 
 - Confirm the proposed API performance load and thresholds.
 - Confirm the standard-page list, browser versions, network conditions,
@@ -376,7 +436,7 @@ Evidence: deployment checklist and results from both operating systems.
 Owner: Quality Assurance Engineer.
 Reviewers: Software Architect, DevOps Engineer, and Product Owner.
 
-## 9. Execution Record
+## Execution Record
 
 For each executed test, record:
 - NFR ID and test-case ID.
