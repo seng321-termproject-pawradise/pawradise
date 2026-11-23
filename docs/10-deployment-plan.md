@@ -3,7 +3,7 @@
 **Course:** SENG 321 – Software Engineering  
 **Sprint:** Sprint 2  
 **Responsible Role:** DevOps Engineer  
-**Status:** Approved Architecture Plan
+**Status:** Sprint 2 – Ready for review
 
 ## 1. Technology Stack
 
@@ -62,12 +62,18 @@ MySQL data will be stored in a Docker named volume called `mysql_data`.
 
 The volume will preserve database data when containers are stopped, removed, or recreated, unless the volume is explicitly deleted.
 
-## 6. Deployment Responsibilities
+## 6. Startup and Initialization
+
+- **Single command:** The whole system starts with `docker compose up --build` (NFR-10).
+- **Start order:** `depends_on` with health checks starts `db` first, then `backend`, and `frontend` (Nginx) last.
+- **Admin accounts:** Admin users are created by a seed step during deployment, not through public registration (A-03).
+
+## 7. Deployment Responsibilities
 
 The DevOps Engineer is responsible for documenting the deployment architecture, Docker Compose service structure, network exposure, environment configuration, and persistent storage strategy.
 
 Actual Dockerfiles, Compose configuration, and Nginx configuration will be implemented in a subsequent implementation task.
 
-## 7. Architecture Alignment
+## 8. Architecture Alignment
 
 This plan follows the team's approved React + FastAPI + MySQL architecture and supports the deployment and security requirements documented in `docs/06-architecture.md` and `docs/08-nfr.md`.
