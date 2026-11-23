@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 1.4 |
+| Version | 1.5 |
 | Status | Ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
@@ -19,7 +19,7 @@ This document describes the software architecture of Pawradise – Animal Shelte
 
 ### 1.2 Scope
 
-The document covers the Sprint 2 architecture baseline. It is aligned with the OpenAPI contract, the functional requirements (FR-01 – FR-21), the non-functional requirements (NFR-01 – NFR-10) and the team decisions K1 – K9.
+The document covers the Sprint 2 architecture baseline. It is aligned with the OpenAPI contract, the functional requirements (FR-01 – FR-21), the non-functional requirements (official NFR-01 – NFR-09, and NFR-10, a team-defined deployment requirement in `docs/08-nfr.md`) and the team decisions K1 – K9.
 
 ### 1.3 Technology Stack
 
@@ -784,7 +784,7 @@ stateDiagram-v2
 | Reserved → Adopted | `recordHandover` | Physical handover; sets `ownerAdopterId` (BR-04) |
 | Available → Archived | `archiveAnimal` | Owning shelter or Admin (moderation, FR-05) |
 
-Adopted and Archived are final states. Reserved and Adopted animals cannot be archived.
+Adopted and Archived are final states. Reserved and Adopted animals cannot be archived. No transition out of Reserved is defined when a handover does not happen; this is still open issue OI-01 (`docs/02-vision-boundary.md`, Section 11) and will be added here once the team decides.
 
 ### 9.2 Adoption Application
 
@@ -934,9 +934,9 @@ Every protected operation also passes through the Security Dependencies (Section
 | NFR-06, NFR-07 | Browser support, responsive UI | React single-page application served by Nginx; responsive layouts defined in `docs/09-ui-ux.md` (Section 4) |
 | NFR-08 | Consistency under concurrency | InnoDB row locking in a fixed order, re-checks after locking (ADR-04, Section 8.2) |
 | NFR-09 | Audit trail | Insert-only history tables with foreign keys, written in the same transaction (ADR-07, Section 7.2) |
-| NFR-10 | Deployability | Docker Compose, single command, Nginx as the single entry point (ADR-06, Section 10) |
+| NFR-10 (team-defined) | Deployability | Docker Compose, single command, Nginx as the single entry point (ADR-06, Section 10) |
 
-The full list of NFRs, their measurable targets and verification methods is specified in `docs/08-nfr.md`.
+NFR-01 – NFR-09 come from the official requirements list; NFR-10 was added by the team to make the single-command Docker Compose deployment measurable. The full list of NFRs, their measurable targets and verification methods is specified in `docs/08-nfr.md`.
 
 ### 11.3 Business Rules → Components
 
