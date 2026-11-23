@@ -3,7 +3,7 @@
 | Item | Value |
 |---|---|
 | Document | `docs/06-architecture.md` |
-| Version | 1.3 |
+| Version | 1.4 |
 | Status | Ready for review |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
@@ -929,6 +929,7 @@ Every protected operation also passes through the Security Dependencies (Section
 | NFR-01 | Performance | Layered backend with direct SQL access through repositories; indexes for browsing and filtering (Section 7.3) |
 | NFR-02 | Password security | bcrypt with work factor 12; hash never returned (ADR-05, Section 7.2) |
 | NFR-03 | Authentication and authorization | JWT, Security Dependencies with role, ban and K2 checks on every request (ADR-05, Section 8.1) |
+| NFR-04 | Usability | Role-specific screens mapped one-to-one to OpenAPI operations; confirmation dialogs for destructive actions; the frontend redirects to the login screen on 401 (Section 4; screen list in `docs/09-ui-ux.md`) |
 | NFR-05 | Consistent error handling | Common error body `{status, error, message}` from one exception handler (ADR-03, Section 5.2) |
 | NFR-06, NFR-07 | Browser support, responsive UI | React single-page application served by Nginx; responsive layouts defined in `docs/09-ui-ux.md` (Section 4) |
 | NFR-08 | Consistency under concurrency | InnoDB row locking in a fixed order, re-checks after locking (ADR-04, Section 8.2) |
