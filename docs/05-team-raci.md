@@ -155,12 +155,12 @@ Task assignment and decisions: [`docs/meetings/sprint-2-decision-log.md`](meetin
 | 1 | Software Requirements Specification | PO | PO | `docs/07-srs.md` | #55, #56 |
 | 2 | Non-Functional Requirements | QA | QA, PO | `docs/08-nfr.md` | #51, #52 |
 | 3 | Architecture Document (ADRs, C4, UML, database schema) | ARCH | ARCH | `docs/06-architecture.md` | #53, #54 |
-| 4 | Figma Prototypes, User Flows, and UI/UX Document | IMPL | IMPL | Figma, `docs/09-ui-ux.md` | – |
+| 4 | Figma Prototypes, User Flows, and UI/UX Document | IMPL | IMPL, ARCH, DEVOPS, SM (screens) | Figma, `docs/09-ui-ux.md` | #68 |
 | 5 | OpenAPI Update (admin and shelter operations, version 0.2.0) | ARCH | IMPL | `api/openapi.yaml` | #19, #25 |
-| 6 | Deployment Plan | DEVOPS | DEVOPS | Deployment plan | – |
-| 7 | Product Backlog Update and User Story Issues | PO | PO | `docs/04-backlog.md`, GitHub Issues | #39, #40 |
-| 8 | Sprint 2 Board, Decision Log, and RACI Update | SM | SM | Project board, `docs/meetings/`, `docs/05-team-raci.md` | – |
-| 9 | Individual Contributions, Sprint 2 Release, and Submission | SM | SM | `CONTRIBUTIONS.md`, tag `sprint-2` | – |
+| 6 | Deployment Plan | DEVOPS | DEVOPS | `docs/10-deployment-plan.md` | #61, #62 |
+| 7 | Product Backlog Update and User Story Issues | PO | PO | `docs/04-backlog.md`, GitHub Issues | #39, #40, #64 |
+| 8 | Sprint 2 Board, Decision Log, and RACI Update | SM | SM | Project board, `docs/meetings/`, `docs/05-team-raci.md` | #57, #60 |
+| 9 | Individual Contributions, Sprint 2 Release, and Submission | SM | SM | `CONTRIBUTIONS.md`, tag `sprint-2` | #67 |
 
 ## 6. Approval
 
@@ -169,4 +169,5 @@ This document was reviewed and accepted by all team members through its pull req
 | Version | Date | Change | Pull Request |
 |---|---|---|---|
 | 1.0 | 2026-11-03 | Initial team roles and RACI matrix | #17 |
-| 1.1 | 2026-11-19 | Sprint 2 activities and deliverable ownership | – |
+| 1.1 | 2026-11-19 | Sprint 2 activities and deliverable ownership | #60 |
+| 1.2 | 2026-11-24 | Sprint 2 issue and pull request links, deployment plan location, Figma screen ownership | #69 |
