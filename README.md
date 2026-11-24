@@ -95,7 +95,7 @@ The proposed technology stack is:
 | Documentation | Markdown |
 | API Validation | Swagger Editor |
 
-The technology stack is subject to final team confirmation.
+The technology stack was confirmed in decision K1 (`docs/meetings/sprint-2-decision-log.md`) and is described in `docs/06-architecture.md`.
 
 ## 7. Repository Structure
 
@@ -115,7 +115,12 @@ pawradise/
 │   ├── 02-vision-boundary.md
 │   ├── 03-api-flows.md
 │   ├── 04-backlog.md
-│   └── 05-team-raci.md
+│   ├── 05-team-raci.md
+│   ├── 06-architecture.md
+│   ├── 07-srs.md
+│   ├── 08-nfr.md
+│   ├── 09-ui-ux.md
+│   └── 10-deployment-plan.md
 ├── CONTRIBUTING.md
 ├── CONTRIBUTIONS.md
 ├── LICENSE
@@ -156,12 +161,18 @@ Detailed installation, configuration, and execution instructions will be provide
 | `docs/01-proposal.md` | Project Proposal |
 | `docs/02-vision-boundary.md` | System Vision and Boundary |
 | `docs/03-api-flows.md` | API Flows |
-| `docs/04-backlog.md` | Initial Product Backlog |
+| `docs/04-backlog.md` | Product Backlog |
 | `docs/05-team-raci.md` | Team Roles and RACI Matrix |
+| `docs/06-architecture.md` | Architecture Document (ADRs, C4 Model, UML, Database Schema) |
+| `docs/07-srs.md` | Software Requirements Specification |
+| `docs/08-nfr.md` | Non-Functional Requirements and Verification Plan |
+| `docs/09-ui-ux.md` | UI/UX Design, Screens, and User Flows |
+| `docs/10-deployment-plan.md` | Docker Compose Deployment Plan |
+| [Figma file](https://www.figma.com/design/YkGpE92LK1feJznGD0ni8T/pawradise) | UI/UX Prototypes (screens 1–18 and design system) |
 | `api/openapi.yaml` | API Specification |
 | `CONTRIBUTING.md` | Contribution Guidelines |
-| `CONTRIBUTIONS.md` | Individual Contributions and Sprint 1 Submission |
-| `docs/meetings/` | Meeting Minutes and Sprint 1 Decision Log |
+| `CONTRIBUTIONS.md` | Individual Contributions (Sprint 1 and Sprint 2) |
+| `docs/meetings/` | Meeting Minutes and Sprint 1 and Sprint 2 Decision Logs |
 | `docs/evidence/` | Branch Protection and Swagger Editor Evidence |
 
 ## 11. License

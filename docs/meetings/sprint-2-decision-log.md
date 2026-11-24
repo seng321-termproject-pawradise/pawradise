@@ -95,3 +95,21 @@ Decision numbers follow the team's list; K5 (calendar) is intentionally not used
 | NFR document (PR #52) | Open, reviewed with comments |
 | OpenAPI update (PR #25) | Open, reviewed with comments |
 | Swagger evidence rename (PR #50) | Merged |
+
+## Status on 24 November 2026 (Sprint 2 Submission)
+
+| Item | Status |
+|---|---|
+| Sprint 2 decision log and RACI update (#57, PR #60) | Merged (20 Nov) |
+| SRS (#55, PR #56) | Merged (21 Nov) |
+| Architecture document (#53, PR #54) | Merged (23 Nov) |
+| Vision assumptions, OI-04, admin provisioning note (#58, PR #59) | Merged (23 Nov) |
+| OpenAPI update to version 0.2.0 (#19, PR #25) | Merged (23 Nov) |
+| Status update of API flows and architecture (PR #63) | Merged (24 Nov) |
+| Proposal and backlog aligned with Sprint 2 decisions (#39, #40, PR #64) | Merged (24 Nov) |
+| Deployment plan, `docs/10-deployment-plan.md` (#61, PR #62) | Merged (24 Nov) |
+| NFR document, `docs/08-nfr.md` (#51, PR #52) | Merged (24 Nov) |
+| Efekan's Sprint 2 contributions record (#65, PR #66) | Merged (24 Nov) |
+| Figma prototypes (screens 1–18, design system) | Done; shared Figma file |
+| UI/UX document, `docs/09-ui-ux.md`, screen images and user flows (PR #68) | Merged (24 Nov) |
+| Individual contributions, `sprint-2` release, submission (#67, PR #69) | In progress |
