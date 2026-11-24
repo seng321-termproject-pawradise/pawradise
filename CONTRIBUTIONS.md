@@ -1,4 +1,4 @@
-# Individual Contributions – Sprint 1
+# Individual Contributions
 
 | Field | Value |
 |---|---|
@@ -108,23 +108,54 @@ Pull requests without a note are merged into `develop`. Pull requests marked *op
 |---|---|
 | Student No | 220201024 |
 | GitHub | [@VarnaToent0](https://github.com/VarnaToent0) |
-| Responsibilities | Quality assurance, issue and pull request templates, Definition of Done, acceptance criteria and API reviews, testing |
+| Responsibilities | Quality assurance, issue and pull request templates, Definition of Done, acceptance criteria and API reviews, verification planning and testing |
 
-**Work completed**
+### Sprint 1
 
-- Issue templates with title, description, related FR/epic, acceptance criteria, priority, and assignee fields (#31).
-- Pull request template with summary, related issue, changes, testing/validation, checklist, and reviewer sections (#33).
-- Definition of Done update in the product backlog (#37).
-- Swagger Editor validation of the OpenAPI contract with screenshot evidence (#43, `docs/evidence/`).
-- QA findings reported as issues: image URL schema validation (#38), handover rejection scenario (#39), documentation inconsistencies (#40), inconsistent response examples (#41).
-- Formal reviews of #25, #36, and #42 (fix of the QA findings #38 and #41).
+#### Work Completed
 
-**Links**
+- Created issue templates with title, description, related FR/epic, acceptance criteria, priority and assignee fields (#31).
+- Updated the pull request template with summary, related issue, changes, testing/validation, checklist and reviewer sections (#33).
+- Updated the Definition of Done in the product backlog (#37).
+- Validated the OpenAPI contract using Swagger Editor and recorded screenshot evidence (#43, `docs/evidence/`).
+- Reported QA findings: image URL schema validation (#38), missing handover rejection scenario (#39), documentation inconsistencies (#40) and inconsistent API response examples (#41).
+- Submitted formal reviews of #25, #36 and #42, including review of fixes for QA findings #38 and #41.
 
-- **Issues:** [#30](https://github.com/seng321-termproject-pawradise/pawradise/issues/30), [#32](https://github.com/seng321-termproject-pawradise/pawradise/issues/32), [#34](https://github.com/seng321-termproject-pawradise/pawradise/issues/34), [#38](https://github.com/seng321-termproject-pawradise/pawradise/issues/38), [#39](https://github.com/seng321-termproject-pawradise/pawradise/issues/39), [#40](https://github.com/seng321-termproject-pawradise/pawradise/issues/40), [#41](https://github.com/seng321-termproject-pawradise/pawradise/issues/41)
-- **Pull requests:** [#31](https://github.com/seng321-termproject-pawradise/pawradise/pull/31), [#33](https://github.com/seng321-termproject-pawradise/pawradise/pull/33), [#37](https://github.com/seng321-termproject-pawradise/pawradise/pull/37), [#43](https://github.com/seng321-termproject-pawradise/pawradise/pull/43)
-- **Reviews:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36), [#42](https://github.com/seng321-termproject-pawradise/pawradise/pull/42)
-- **Commits:** [commits by @VarnaToent0](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=VarnaToent0)
+#### Evidence and Links
+
+- **Issues:** [#30](https://github.com/seng321-termproject-pawradise/pawradise/issues/30), [#32](https://github.com/seng321-termproject-pawradise/pawradise/issues/32), [#34](https://github.com/seng321-termproject-pawradise/pawradise/issues/34), [#38](https://github.com/seng321-termproject-pawradise/pawradise/issues/38), [#39](https://github.com/seng321-termproject-pawradise/pawradise/issues/39), [#40](https://github.com/seng321-termproject-pawradise/pawradise/issues/40), [#41](https://github.com/seng321-termproject-pawradise/pawradise/issues/41).
+- **Merged pull requests:** [#31](https://github.com/seng321-termproject-pawradise/pawradise/pull/31), [#33](https://github.com/seng321-termproject-pawradise/pawradise/pull/33), [#37](https://github.com/seng321-termproject-pawradise/pawradise/pull/37), [#43](https://github.com/seng321-termproject-pawradise/pawradise/pull/43).
+- **Reviews:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#36](https://github.com/seng321-termproject-pawradise/pawradise/pull/36), [#42](https://github.com/seng321-termproject-pawradise/pawradise/pull/42).
+
+### Sprint 2
+
+Contribution record as of 24 November 2026.
+
+#### Contributions
+
+- Renamed the Swagger validation evidence to `docs/evidence/swagger-editor-validation.png` without changing the image content.
+  - Issue: [#49](https://github.com/seng321-termproject-pawradise/pawradise/issues/49).
+  - PR: [#50](https://github.com/seng321-termproject-pawradise/pawradise/pull/50) — merged.
+
+- Authored `docs/08-nfr.md`, defining measurable targets, test conditions, verification tools and evidence requirements for NFR-01 through NFR-10.
+  - Covered performance, bcrypt password storage, JWT authentication and authorization, usability, error handling, browser compatibility, responsive UI, concurrent approval consistency, audit history and deployment portability.
+  - Incorporated review feedback and team decisions on token lifetime, refresh-token behavior, bcrypt work factor, reference environment and verification conditions.
+  - Issue: [#51](https://github.com/seng321-termproject-pawradise/pawradise/issues/51).
+  - PR: [#52](https://github.com/seng321-termproject-pawradise/pawradise/pull/52) — submitted for review; final approval and merge pending at the record date.
+
+- Submitted a QA review of the Sprint 2 vision and API-flow updates.
+  - Checked shelter registration decisions, apartment-information storage, automatic-rejection attribution and JWT session behavior.
+  - Reported an outdated API-version reference in the PR description and identified merge dependencies.
+  - Review: [PR #59 — QA review](https://github.com/seng321-termproject-pawradise/pawradise/pull/59#pullrequestreview-6013689695).
+  - Review type: COMMENTED. The PR was subsequently merged.
+
+#### Validation Scope
+
+Sprint 2 contributions cover documentation, verification planning and static review. No runtime, security, performance, concurrency or deployment test results are claimed. Defined test targets and verification procedures do not represent executed tests.
+
+#### Commit History
+
+[Commits by @VarnaToent0](https://github.com/seng321-termproject-pawradise/pawradise/commits/develop?author=VarnaToent0)
 
 ---
 
