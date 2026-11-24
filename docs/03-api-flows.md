@@ -3,10 +3,10 @@
 | Item | Value |
 |------|-------|
 | Project | Pawradise – Animal Shelter & Adoption System |
-| Sprint | Sprint 1 (November 2026) |
+| Sprint | Sprint 1, updated in Sprint 2 (November 2026) |
 | Document Owner | Software Architect |
-| Status | Draft – pending team review |
-| API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.1.0) |
+| Status | Sprint 2 update – F8 and F9 aligned with OpenAPI 0.2.0 |
+| API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.2.0) |
 
 > This document explains how the operations in `api/openapi.yaml` work together in the main user journeys. It does not add, remove, or change any requirement. Requirement IDs refer to the Official Requirements Reference for Sprint 1.
 
@@ -23,7 +23,8 @@
 | F5 | Record handover | Shelter Owner | `recordHandover` | FR-12, BR-04, BR-09 |
 | F6 | Withdraw an application | Adopter | `withdrawApplication` | FR-18, BR-03 |
 | F7 | Reject or archive | Shelter Owner, Admin | `rejectApplication`, `archiveAnimal` | FR-05, FR-09, FR-11 |
-| F8 | Ban an adopter (planned operation) | Admin | Not yet in OpenAPI 0.1.0 | FR-06, BR-07, BR-09 |
+| F8 | Ban or unban a user | Admin | `listUsers`, `banUser`, `unbanUser` | FR-06, BR-07, BR-09 |
+| F9 | Shelter registration and profile management | Shelter Owner, Admin | `createShelterProfile`, `getMyShelterProfile`, `updateMyShelterProfile`, `listShelterRegistrationRequests`, `approveShelterRegistration`, `rejectShelterRegistration` | FR-03, FR-04, FR-07, K2, K3 |
 
 **Common rules for all flows**
 
@@ -61,6 +62,12 @@ sequenceDiagram
     U->>API: POST /auth/logout (Bearer token)
     API-->>U: 204 No Content
 ```
+
+**Notes**
+
+- Public registration accepts only the roles `ADOPTER` and `SHELTER_OWNER`. Admin accounts are not created through `registerUser`; they are created by a seed step when the system is deployed and log in through `loginUser` like other users (A-03, `docs/06-architecture.md` Section 10.2).
+- The access token is valid for 30 minutes and there is no refresh token. After expiry, protected operations return 401 and the user logs in again (decision K9).
+- On logout, the client discards the token (`docs/06-architecture.md`, ADR-05).
 
 ---
 
@@ -249,9 +256,9 @@ Both operations record the change in the status history (BR-09).
 
 ---
 
-## 9. F8 – Ban an Adopter (Planned Operation)
+## 9. F8 – Ban or Unban a User
 
-> The Admin ban and unban operations (FR-06) are **not yet defined** in `api/openapi.yaml` version 0.1.0. This section documents the agreed behavior (team decision on BR-07) so that the future endpoint can be designed consistently. No endpoint path is defined here.
+The Admin finds the user with `listUsers` and bans them with `banUser` (FR-06). Unbanning (`unbanUser`) only sets `banned = false`; applications rejected by the ban are not restored.
 
 ```mermaid
 sequenceDiagram
@@ -259,20 +266,74 @@ sequenceDiagram
     participant API as Pawradise API
     participant DB as Database
 
-    AD->>API: Ban adopter (planned operation, FR-06)
-    API->>DB: BEGIN TRANSACTION
-    API->>DB: Lock the adopter row
-    API->>DB: Set adopter banned = true
-    API->>DB: All Pending applications of the adopter → Rejected (BR-07)
-    API->>DB: Record every status change (BR-09)
-    API->>DB: COMMIT
-    API-->>AD: Success
+    AD->>API: GET /admin/users?role=ADOPTER
+    API-->>AD: 200 OK [User]
+
+    AD->>API: POST /admin/users/{userId}/ban
+    alt User does not exist
+        API-->>AD: 404 Not Found
+    else User exists
+        API->>DB: BEGIN TRANSACTION
+        API->>DB: Lock the adopter row
+        API->>DB: Set adopter banned = true
+        API->>DB: All Pending applications of the adopter → Rejected (BR-07)
+        API->>DB: Record every status change (BR-09, changedBy = Admin)
+        API->>DB: COMMIT
+        API-->>AD: 200 OK {user, autoRejectedApplicationIds}
+    end
     Note over API,DB: Approved applications are not changed.
 ```
 
 Because the ban locks the same adopter row as the approval transaction (F3, F4), a ban and an approval for the same adopter cannot interleave: either the approval finishes first, or the application is already Rejected and the approval returns 409.
 
-## 10. Status Transitions Summary
+## 10. F9 – Shelter Registration and Profile Management
+
+A Shelter Owner registers an account (F1), logs in and submits the shelter profile, which starts with status Pending. An Admin reviews the request and approves or rejects it (FR-03, FR-04, FR-07; decisions K2 and K3).
+
+```mermaid
+sequenceDiagram
+    actor SO as Shelter Owner
+    actor AD as Admin
+    participant API as Pawradise API
+    participant DB as Database
+
+    SO->>API: POST /shelters {name, address, contactEmail, phone, operatingHours?, description?}
+    alt Profile already exists
+        API-->>SO: 409 Conflict
+    else No profile yet
+        API->>DB: Save shelter profile (status = Pending)
+        API-->>SO: 201 Created (ShelterProfile)
+    end
+
+    SO->>API: GET /shelters/me
+    API-->>SO: 200 OK (ShelterProfile, status Pending)
+
+    SO->>API: POST /animals (any animal or application operation)
+    API-->>SO: 403 Forbidden (shelter profile not Approved, K2)
+
+    AD->>API: GET /admin/shelters/requests
+    API-->>AD: 200 OK [ShelterProfile] (Pending requests)
+
+    alt Admin approves
+        AD->>API: POST /admin/shelters/{shelterId}/approve
+        API->>DB: Pending → Approved
+        API-->>AD: 200 OK
+    else Admin rejects
+        AD->>API: POST /admin/shelters/{shelterId}/reject
+        API->>DB: Pending → Rejected
+        API-->>AD: 200 OK
+    end
+    Note over API: Approving or rejecting a profile that is not Pending returns 409.
+
+    SO->>API: PATCH /shelters/me {contact details, operatingHours}
+    API->>DB: Update profile
+    API-->>SO: 200 OK (ShelterProfile)
+```
+
+- A Shelter Owner can create, view and update their own profile in every status. Animal and application operations are allowed only when the profile is **Approved** (K2).
+- A rejected shelter cannot submit a new registration request in the current scope (K3).
+
+## 11. Status Transitions Summary
 
 ```mermaid
 stateDiagram-v2
@@ -295,3 +356,14 @@ stateDiagram-v2
         Pending --> Withdrawn: withdrawApplication
     }
 ```
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    state "Shelter registration" as Shelter {
+        [*] --> Pending: createShelterProfile
+        Pending --> Approved: approveShelterRegistration
+        Pending --> Rejected: rejectShelterRegistration
+    }
+```
+

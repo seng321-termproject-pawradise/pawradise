@@ -1,4 +1,4 @@
-**Course:** SENG 321 Software Engineering \| **Role:** Product Owner & Requirements Engineer **Deliverable:** docs/01-proposal.md (Version 1.4 - Final Sprint 1) \| **License:** Apache License 2.0
+**Course:** SENG 321 Software Engineering \| **Role:** Product Owner & Requirements Engineer **Deliverable:** docs/01-proposal.md (Version 1.5 - Sprint 2 Alignment) \| **License:** Apache License 2.0
 
 # 1. Problem Statement & Supporting Evidence
 
@@ -45,11 +45,11 @@ Across municipal and non-profit animal welfare ecosystems, companion animal shel
 
 # 4. Measurable Goals and Expected Outcomes
 
-1\. Streamline the review workflow to enable shelter evaluation decisions within 48 hours of application submission. 2. Achieve 0% double-approval error rate guaranteed by atomic database transactions. 3. 100% compliance verification on apartment permission documents for dog adoptions. 4. 100% enforcement of BR-08: an adopter shall not have more than three animals in total with Reserved or Adopted status at the same time. 5. 100% audit traceability for animal inventory and application state transitions. 6. API response latency strictly under 3 seconds for animal catalog search and filtering requests (aligned with NFR-01).
+1\. Streamline the review workflow to enable shelter evaluation decisions within 48 hours of application submission. 2. Achieve 0% double-approval error rate guaranteed by atomic database transactions. 3. 100% compliance verification on apartment permission documents for dog adoptions. 4. 100% enforcement of BR-08: an adopter shall not have more than three animals in total with Reserved or Adopted status at the same time. 5. 100% audit traceability for animal inventory and application state transitions. 6. Standard pages load within 3 seconds under normal conditions (aligned with NFR-01), with API response latency target p95 < 1 second as defined in `docs/08-nfr.md`.
 
 # 5. Feasibility Assessment
 
-**• Technical Feasibility:** API-first RESTful architecture specified in OpenAPI 0.1.0 with containerized execution and ACID relational database.
+**• Technical Feasibility:** API-first RESTful architecture specified in OpenAPI 0.2.0 with containerized execution and ACID relational database.
 
 **• Operational Feasibility:** Directly mirrors standard shelter workflows (intake -\> listing -\> review -\> reservation -\> handover).
 
@@ -63,14 +63,14 @@ Across municipal and non-profit animal welfare ecosystems, companion animal shel
 
 # 7. Assumptions (A-01 - A-09) and Potential Risks
 
-Project Assumptions (aligned with System Vision; unresolved items remain assumptions):  
+Project Assumptions (aligned with System Vision; confirmed in Sprint 2):  
 A-01: Users access the system through a modern web browser with an internet connection.  
 A-02: Animal image URLs point to external image hosts; the system stores URLs rather than uploading image files.  
-A-03: Admin accounts are provisioned by the team (e.g., seeded), not through public registration (to be confirmed).  
-A-04: Shelter Owners publish listings only after Admin approval of shelter registration (to be confirmed).  
-A-05: Adopters declare apartment residence for BR-06; whether this is stored in the profile or each application remains to be confirmed.  
-A-06: Required documents are submitted as document links or references because direct uploads are out of scope (to be confirmed).  
-A-07: Automatic rejections under BR-02 record the approving Shelter Owner as the responsible actor in status history (to be confirmed).  
+A-03: Admin accounts are provisioned by the team (e.g., seeded), not through public registration (confirmed in Sprint 2).  
+A-04: Shelter Owners publish listings and manage adoption applications only after Admin approval of shelter registration (confirmed in Sprint 2, decision K2; closes OI-04).  
+A-05: Adopters declare apartment residence (`livesInApartment`) for BR-06; stored in each application (confirmed in Sprint 2).  
+A-06: Required documents are submitted as document links or references because direct uploads are out of scope (confirmed in Sprint 2).  
+A-07: Automatic rejections under BR-02 record the approving Shelter Owner as the responsible actor in status history; automatic rejections under BR-07 record the Admin who banned the adopter (confirmed in Sprint 2).  
 A-08: Status history records cannot be edited or deleted.  
 A-09: FR-20 eligibility covers BR-05 required documents, BR-06 apartment permission, and BR-08 adoption limit. BR-07 blocks banned adopters from applying and requires their Pending applications to be rejected upon banning; Approved applications stay unchanged. BR-08 counts Reserved and Adopted animals toward the limit.
 
@@ -85,16 +85,16 @@ A-09: FR-20 eligibility covers BR-05 required documents, BR-06 apartment permiss
 
 # 8. Open Issues (Cross-Referenced with System Vision Baseline)
 
-|           |                                                                                                                                                                     |                                                             |
-|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| **ID**    | **Issue Description**                                                                                                                                               | **Status**                                                  |
-| **OI-01** | Undefined Exit from Reserved Status: If an approved adopter abandons the adoption prior to physical handover, the procedure for canceling reservation is undefined. | **Open**                                                    |
-| **OI-02** | Count of Reserved Animals in Adoption Quota: Clarification on whether animals in Reserved status count toward the adopter's 3-animal limit.                         | Closed: Reserved animals count toward limit (BR-08)         |
-| **OI-03** | Status of Pending Applications for Post-Banned Users: Handling policy for existing pending applications submitted by a user who is subsequently banned.             | Closed: Pending applications automatically rejected (BR-07) |
-| **OI-04** | Shelter Registration Statuses: Clarification of full state machine and allowed transitions for shelter registration requests.                                       | **Open**                                                    |
-| **OI-05** | Supported Species: Determination of the complete enumeration of supported animal species beyond dogs and cats.                                                      | **Open**                                                    |
-| **OI-06** | Interpretation of 'Remove' in FR-05: Clarification on whether administrative action signifies soft archival, de-listing, or record deletion.                        | **Open**                                                    |
-| **OI-07** | Mandatory Documents List: Specification of definitive list of mandatory documents required prior to approval beyond apartment authorization.                        | **Open**                                                    |
+|           |                                                                                                                                                                     |                                                                                                      |
+|-----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| **ID**    | **Issue Description**                                                                                                                                               | **Status**                                                                                           |
+| **OI-01** | Undefined Exit from Reserved Status: If an approved adopter abandons the adoption prior to physical handover, the procedure for canceling reservation is undefined. | **Open**                                                                                             |
+| **OI-02** | Count of Reserved Animals in Adoption Quota: Clarification on whether animals in Reserved status count toward the adopter's 3-animal limit.                         | Closed: Reserved animals count toward limit (BR-08)                                                  |
+| **OI-03** | Status of Pending Applications for Post-Banned Users: Handling policy for existing pending applications submitted by a user who is subsequently banned.             | Closed: Pending applications automatically rejected (BR-07)                                          |
+| **OI-04** | Shelter Registration Statuses: Clarification of full state machine and allowed transitions for shelter registration requests.                                       | Closed (K2): Pending, Approved, Rejected; only an Approved shelter can manage animals and applications |
+| **OI-05** | Supported Species: Determination of the complete enumeration of supported animal species beyond dogs and cats.                                                      | **Open**                                                                                             |
+| **OI-06** | Interpretation of 'Remove' in FR-05: Clarification on whether administrative action signifies soft archival, de-listing, or record deletion.                        | **Open**                                                                                             |
+| **OI-07** | Mandatory Documents List: Specification of definitive list of mandatory documents required prior to approval beyond apartment authorization.                        | **Open**                                                                                             |
 
 **Additional Open Issues (Pending Team Discussion):** Document MIME type validation, Reservation holding period expiration timeout, Multi-shelter staff relationships.
 

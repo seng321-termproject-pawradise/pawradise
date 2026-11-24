@@ -4,9 +4,9 @@
 |------|-------|
 | Project | Pawradise – Animal Shelter & Adoption System |
 | Course | SENG 321 – Software Engineering |
-| Sprint | Sprint 1 (November 2026) |
+| Sprint | Sprint 1, updated in Sprint 2 (November 2026) |
 | Document Owner | Software Architect |
-| Status | Draft – pending team review |
+| Status | Sprint 2 update – assumptions confirmed, OI-04 closed |
 | Source of Truth | Official Requirements Reference – Sprint 1 (FR-01 – FR-21, NFR-01 – NFR-09, BR-01 – BR-09) |
 
 > This document describes the vision and boundary of the system. It does not add, remove, or change any requirement. All requirement IDs refer to the Official Requirements Reference.
@@ -110,6 +110,16 @@ The system is responsible for:
 
 Approved, Rejected, and Withdrawn are final for withdrawal purposes (BR-03, Scenario 4).
 
+**Shelter registration statuses:** Pending, Approved, Rejected
+
+| From | To | Trigger |
+|------|----|---------|
+| – | Pending | Shelter owner submits the shelter profile (FR-07) |
+| Pending | Approved | Admin approves the registration request (FR-04) |
+| Pending | Rejected | Admin rejects the registration request (FR-04) |
+
+Approved and Rejected are final (Section 5.8).
+
 ### 5.7 Team Clarifications of Business Rules (Sprint 1)
 
 The team agreed on the following clarifications during Sprint 1. They clarify how BR-07 and BR-08 are applied; the official requirement IDs and the wording in the Official Requirements Reference are unchanged.
@@ -120,6 +130,17 @@ The team agreed on the following clarifications during Sprint 1. They clarify ho
 | BR-08 – Adoption Limit Rule | An adopter shall not have more than three animals in total with Reserved or Adopted status at the same time. Animals with Available or Archived status do not count toward this limit. | The limit is checked during application approval. If the approval would exceed the limit, the API returns 422 Unprocessable Content. The limit must also hold for concurrent approvals. |
 
 These decisions close OI-02 and OI-03 (Section 11).
+
+### 5.8 Team Decisions (Sprint 2)
+
+The team agreed on the following decisions in Sprint 2. They do not change any official requirement.
+
+| Decision | Topic | Team Decision |
+|----------|-------|---------------|
+| K2 | Shelter registration (OI-04) | A shelter profile has the statuses Pending, Approved and Rejected. A shelter owner can log in and create, view and update their own profile at any time. Until the profile is Approved, operations on animals and adoption applications (FR-08 – FR-12) return 403 Forbidden. |
+| K3 | Rejected shelters | A rejected shelter cannot submit a new registration request in the current scope. |
+
+These decisions close OI-04 (Section 11). The architecture that implements them is described in `docs/06-architecture.md`.
 
 ## 6. System Context Diagram
 
@@ -213,19 +234,19 @@ The following features are **not** part of the initial project:
 
 ## 10. Assumptions
 
-These assumptions do not change any requirement. Items marked **(to be confirmed)** need team agreement.
+These assumptions do not change any requirement. All assumptions were confirmed by the team in Sprint 2.
 
 | ID | Assumption |
 |----|------------|
 | A-01 | Users access the system through a modern web browser with an internet connection. |
 | A-02 | Image URLs point to images hosted outside the system. The system stores and displays the URL but does not host image files. |
-| A-03 | Admin accounts are created by the team (for example, seeded) and are not created through public registration. **(to be confirmed)** |
-| A-04 | A shelter owner can publish animal listings only after the admin approves the shelter registration (FR-03, FR-04). **(to be confirmed)** |
-| A-05 | The adopter states whether they live in an apartment, so the system can apply BR-06. **(to be confirmed: stored in the user profile or in each application)** |
-| A-06 | Because direct file uploads are out of scope, required documents are submitted as document links or references. **(to be confirmed)** |
-| A-07 | For automatic rejections (BR-02), the status history records the shelter owner who approved the winning application as the responsible user. **(to be confirmed)** |
+| A-03 | Admin accounts are created by a seed step when the system is deployed and are not created through public registration. |
+| A-04 | A shelter owner can manage animal listings and adoption applications only after the admin approves the shelter registration (FR-03, FR-04; decision K2, Section 5.8). |
+| A-05 | The adopter states in each application whether they live in an apartment (`livesInApartment`), so the system can apply BR-06. |
+| A-06 | Because direct file uploads are out of scope, required documents are submitted as document links (document type and URL) with each application. |
+| A-07 | For automatic rejections (BR-02), the status history records the shelter owner who approved the winning application as the responsible user. For automatic rejections caused by a ban (BR-07), it records the admin who banned the adopter. |
 | A-08 | Status history records cannot be edited or deleted. |
-| A-09 | "Eligibility requirements" in FR-20 means BR-05 (required documents), BR-06 (apartment permission), and BR-08 (adoption limit, Section 5.7). BR-07 is enforced when an application is submitted; because the Pending applications of a banned adopter are automatically rejected (Section 5.7), such applications can no longer be approved. **(to be confirmed)** |
+| A-09 | "Eligibility requirements" in FR-20 means BR-05 (required documents), BR-06 (apartment permission), and BR-08 (adoption limit, Section 5.7). BR-07 is enforced when an application is submitted; because the Pending applications of a banned adopter are automatically rejected (Section 5.7), such applications can no longer be approved. |
 
 ## 11. Open Issues for Team Discussion
 
@@ -236,7 +257,7 @@ According to the consistency rules, these points are reported to the team. Open 
 | OI-01 | There is no transition out of Reserved if a handover does not happen, so the animal can stay Reserved forever. | Animal status transitions, BR-04 | Open |
 | OI-02 | It was not defined whether Reserved animals (approved, not yet handed over) count toward the limit of three. | BR-08, Scenario 6 | **Closed** – Reserved animals count toward the three-animal limit (Section 5.7). |
 | OI-03 | It was not defined what happens to the pending applications of a user who gets banned. | BR-07, FR-06, FR-20 | **Closed** – Pending applications are automatically rejected when an adopter is banned (Section 5.7). |
-| OI-04 | The statuses of a shelter registration request (for example Pending, Approved, Rejected) are not defined. | FR-03, FR-04 | Open |
+| OI-04 | The statuses of a shelter registration request (for example Pending, Approved, Rejected) are not defined. | FR-03, FR-04 | **Closed** – Pending, Approved, Rejected; only an Approved shelter can manage animals and applications (Section 5.8). |
 | OI-05 | It is not defined which species the system supports. BR-06 mentions only dogs and cats. | FR-14, BR-06 | Open |
 | OI-06 | FR-05 says "remove or archive", but listings are archived instead of permanently deleted. The meaning of "remove" needs to be clarified. | FR-05, C-04 | Open |
 | OI-07 | The list of mandatory documents is not defined. Only the apartment permission document (BR-06) is named. | FR-16, BR-05 | Open |
