@@ -45,19 +45,19 @@ The four diagrams below are the canonical user-flow set for this handoff.
 
 ### 4.1 Authentication and role-based routing
 
-![Authentication flow](assets/ui-ux/flows/flow-authentication.png)
+![Authentication flow](assets/ui-ux/flows/authentication-flow.png)
 
 ### 4.2 Adopter flow
 
-![Adopter flow](assets/ui-ux/flows/flow-adopter.png)
+![Adopter flow](assets/ui-ux/flows/adopter-flow.png)
 
 ### 4.3 Shelter Owner flow
 
-![Shelter Owner flow](assets/ui-ux/flows/flow-shelter-owner.png)
+![Shelter Owner flow](assets/ui-ux/flows/shelter-owner-flow.png)
 
 ### 4.4 Admin flow
 
-![Admin flow](assets/ui-ux/flows/flow-admin.png)
+![Admin flow](assets/ui-ux/flows/admin-flow.png)
 
 ## 5. Screen descriptions and traceability
 
@@ -205,10 +205,10 @@ All 18 main-screen PNG exports supplied for this handoff are included under `doc
 
 ### 9.2 User-flow diagrams
 
-- `docs/assets/ui-ux/flows/flow-authentication.png`
-- `docs/assets/ui-ux/flows/flow-adopter.png`
-- `docs/assets/ui-ux/flows/flow-shelter-owner.png`
-- `docs/assets/ui-ux/flows/flow-admin.png`
+- `docs/assets/ui-ux/flows/authentication-flow.png`
+- `docs/assets/ui-ux/flows/adopter-flow.png`
+- `docs/assets/ui-ux/flows/shelter-owner-flow.png`
+- `docs/assets/ui-ux/flows/admin-flow.png`
 
 ### 9.3 Supporting states
 
@@ -223,5 +223,4 @@ Supporting dialog and error-state PNGs are stored in the same `screens/` directo
 - [x] Record confirmation dialogs, validation/error behavior, and adoption business rules.
 - [x] Apply the accepted FR-05 decision: Admin and Shelter Owner share Screen 9 with role-based permissions.
 - [x] Add the Pawradise Figma prototype URL.
-- [ ] Copy `docs/09-ui-ux.md` and `docs/assets/ui-ux/` into the project repository and verify Markdown image rendering there.
 
