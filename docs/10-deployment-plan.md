@@ -3,7 +3,7 @@
 **Course:** SENG 321 – Software Engineering  
 **Sprint:** Sprint 2  
 **Responsible Role:** DevOps Engineer  
-**Status:** Sprint 2 – Ready for review
+**Status:** Sprint 2 baseline – approved and merged
 
 ## 1. Technology Stack
 
