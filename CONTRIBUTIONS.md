@@ -161,7 +161,8 @@ Pull requests without a note are merged into `develop`. Pull requests listed as 
 - Updated the status rows of the API flows and the architecture document after a cross-document consistency check.
 - Prepared the Sprint 2 decision list and task list (recorded in `docs/meetings/sprint-2-decision-log.md`).
 - Designed the Figma screens 13 Application Review, 16 User Management, 17 Shelter Registration Requests, and 18 Shelter Registration Review with their confirmation dialogs.
-- Technical reviews of the SRS, NFR, OpenAPI, deployment plan, decision log, and backlog pull requests.
+- Prepared the screen-to-API mapping table used in `docs/09-ui-ux.md` (Section 6) and reviewed the user-flow diagrams against the OpenAPI contract (document links instead of uploads, eligibility check during approval, BR-08 adoption limit).
+- Technical reviews of the SRS, NFR, OpenAPI, deployment plan, decision log, backlog, and UI/UX pull requests.
 
 #### Evidence and Links
 
