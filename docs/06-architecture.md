@@ -4,7 +4,7 @@
 |---|---|
 | Document | `docs/06-architecture.md` |
 | Version | 1.5 |
-| Status | Ready for review |
+| Status | Sprint 2 baseline – approved |
 | Owner | Işıl Gültekin (Software Architect) |
 | Related issue | #53 |
 | Related documents | `docs/02-vision-boundary.md`, `api/openapi.yaml`, `docs/07-srs.md`, `docs/08-nfr.md`, `docs/09-ui-ux.md` |

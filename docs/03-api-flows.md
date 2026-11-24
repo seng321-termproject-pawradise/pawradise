@@ -5,7 +5,7 @@
 | Project | Pawradise – Animal Shelter & Adoption System |
 | Sprint | Sprint 1, updated in Sprint 2 (November 2026) |
 | Document Owner | Software Architect |
-| Status | Draft – pending team review |
+| Status | Sprint 2 update – F8 and F9 aligned with OpenAPI 0.2.0 |
 | API Contract | [`api/openapi.yaml`](../api/openapi.yaml) (version 0.2.0) |
 
 > This document explains how the operations in `api/openapi.yaml` work together in the main user journeys. It does not add, remove, or change any requirement. Requirement IDs refer to the Official Requirements Reference for Sprint 1.
