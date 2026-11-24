@@ -2,7 +2,9 @@
 
 ## Status and Scope
 
-Status: Sprint 2 baseline — review corrections incorporated.First draft date: 18 November 2026.
+Status: Sprint 2 baseline — review corrections incorporated.
+
+First draft date: 18 November 2026.
 Related issue: #51.
 Related consistency issue: #40.
 
@@ -437,7 +439,6 @@ results. Never reset shared or production data for this test.
 
 Evidence: deployment checklist and results from both operating systems.
 
-## Decisions Required Before Approval
 
 ## Confirmed Review Decisions
 
