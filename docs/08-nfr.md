@@ -2,8 +2,7 @@
 
 ## Status and Scope
 
-Status: Draft for team review.
-First draft date: 18 November 2026.
+Status: Sprint 2 baseline — review corrections incorporated.First draft date: 18 November 2026.
 Related issue: #51.
 Related consistency issue: #40.
 
@@ -36,7 +35,7 @@ directly equivalent.
 
 Standard pages shall load within 3 seconds under normal conditions.
 
-### Proposed measurable API target
+### Approved measurable API target
 
 For authenticated GET /animals requests:
 - Dataset: 1,000 animal records.
@@ -59,13 +58,26 @@ Tool: k6.
 Check response status, expected response structure, latency, and error
 rate. Authentication setup is outside the timed listing requests.
 
-Verify the existing page-loading target separately using Playwright:
-perform 30 page loads per agreed standard page and require each load
-to complete within 3 seconds. Completion means that the main content
-is visible and the page's primary action is usable.
+Verify the page-loading target separately using Playwright.
 
-The standard-page list, browser version, network conditions, and
-external-image behavior must be agreed before page tests are executed.
+Standard pages:
+- Login.
+- Animal List.
+- Animal Detail.
+- My Applications.
+- Application Review.
+- User Management.
+
+Run the tests in the approved local Docker Compose environment
+without network throttling. Record the browser and OS versions.
+
+Perform 30 loads per standard page using the appropriate test account.
+Every load shall complete within 3 seconds. Measure from navigation
+start until the main content is visible and the primary action is usable.
+
+Photos loaded from external URLs are excluded from the 3-second
+measurement. Do not wait for external photo downloads to finish
+when determining page readiness.
 
 The API target supplements the page-loading requirement; it does not
 replace it.
@@ -251,14 +263,16 @@ Execution status: Not executed.
 The interface shall support commonly used browsers and remain usable
 on desktop, tablet and mobile screens.
 
-The browser and viewport matrix below is proposed for team approval.
+The browser and viewport matrix below is approved.
+Safari on macOS is tested manually if a macOS device is available.
+Otherwise, record Safari as Not executed and document the limitation.
 These are planned verification conditions, not completed test results.
 
-### Proposed measurable targets
+### Approved measurable targets
 
 Browser matrix:
 - Google Chrome, Microsoft Edge and Mozilla Firefox on Windows.
-- Safari on macOS.
+- Safari on macOS: manual testing if a macOS device is available.
 - Record the exact browser and operating-system versions at execution.
 
 Viewport matrix, in CSS pixels:
@@ -425,13 +439,31 @@ Evidence: deployment checklist and results from both operating systems.
 
 ## Decisions Required Before Approval
 
-- Confirm the proposed API performance load and thresholds.
-- Confirm the standard-page list, browser versions, network conditions,
-  and external-image behavior for page-loading tests.
-- Confirm the supported deployment operating systems.
-- Confirm the deployment health-check and startup procedure with DevOps.
-- Confirm the browser, operating-system and viewport matrix for
-  NFR-06/NFR-07 compatibility and responsive-layout testing.
+## Confirmed Review Decisions
+
+The following decisions were confirmed through the PR #52 review
+and subsequent team clarification:
+
+- API performance load and thresholds: approved as specified in NFR-01.
+- Reference environment: local Docker Compose, at least 2 CPU cores
+  and 4 GB RAM.
+- Standard pages: Login, Animal List, Animal Detail, My Applications,
+  Application Review and User Management.
+- Page-loading tests: no network throttling; externally hosted photos
+  are excluded from the 3-second measurement.
+- bcrypt work factor: 12.
+- Access-token lifetime: 30 minutes, without refresh tokens.
+- Token-expiry clock tolerance: 0 seconds; expiry requires re-login.
+- Supported deployment operating systems: Windows and Linux.
+- Health checks and startup order: follow docs/06-architecture.md,
+  Section 10.2, and docs/10-deployment-plan.md (PR #62).
+- Browser and viewport matrix: approved.
+- Safari: manual testing when a macOS device is available;
+  otherwise record Not executed and document the limitation.
+- NFR-10 identifier: approved.
+
+Record exact browser, OS and environment versions when tests are executed.
+Approval of these targets does not mean that runtime tests have passed.
 
 Owner: Quality Assurance Engineer.
 Reviewers: Software Architect, DevOps Engineer, and Product Owner.
