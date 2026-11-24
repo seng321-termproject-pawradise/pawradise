@@ -119,6 +119,7 @@ pawradise/
 │   ├── 06-architecture.md
 │   ├── 07-srs.md
 │   ├── 08-nfr.md
+│   ├── 09-ui-ux.md
 │   └── 10-deployment-plan.md
 ├── CONTRIBUTING.md
 ├── CONTRIBUTIONS.md
@@ -165,6 +166,7 @@ Detailed installation, configuration, and execution instructions will be provide
 | `docs/06-architecture.md` | Architecture Document (ADRs, C4 Model, UML, Database Schema) |
 | `docs/07-srs.md` | Software Requirements Specification |
 | `docs/08-nfr.md` | Non-Functional Requirements and Verification Plan |
+| `docs/09-ui-ux.md` | UI/UX Design, Screens, and User Flows |
 | `docs/10-deployment-plan.md` | Docker Compose Deployment Plan |
 | [Figma file](https://www.figma.com/design/YkGpE92LK1feJznGD0ni8T/pawradise) | UI/UX Prototypes (screens 1–18 and design system) |
 | `api/openapi.yaml` | API Specification |

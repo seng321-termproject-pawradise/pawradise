@@ -21,11 +21,11 @@ Pull requests without a note are merged into `develop`. Pull requests listed as 
 | Name | Role | PRs Merged | PRs Submitted (not merged) | PRs Reviewed | Figma Screens |
 |---|---|---|---|---|---|
 | İlayda Erşin | Product Owner | #56, #64 | – | – | – |
-| Şevval Sıla Çelik | Scrum Master | #60 | – | #54, #59, #63, #66 | 6, 7, 8, 12, error states |
-| Işıl Gültekin | Lead Software Architect | #54, #59, #63 | – | #25, #52, #56, #60, #62, #64 | 13, 16, 17, 18 |
+| Şevval Sıla Çelik | Scrum Master | #60, #69 | – | #54, #59, #63, #66 | 6, 7, 8, 12, error states |
+| Işıl Gültekin | Lead Software Architect | #54, #59, #63 | – | #25, #52, #56, #60, #62, #64, #68 | 13, 16, 17, 18 |
 | Efekan Coşkun | QA Engineer | #50, #52, #66 | – | #59 | – |
 | Aslınur İlay Tekin | DevOps Engineer | #62 | – | – | 9, 10, 11, 14, 15 |
-| Fatma Nur Kodak | Implementation Developer | #25 | – | #50 | Design system, 1–5 |
+| Fatma Nur Kodak | Implementation Developer | #25, #68 | – | #50 | Design system, 1–5 |
 
 ## Sprint 1 Summary
 
@@ -112,14 +112,14 @@ Pull requests without a note are merged into `develop`. Pull requests listed as 
 - Recorded the Sprint 2 decisions K1 – K9 and the task assignment (`docs/meetings/sprint-2-decision-log.md`) and added the Sprint 2 activities to the RACI matrix (`docs/05-team-raci.md`, Section 5.2).
 - Set up Sprint 2 on the project board, created the `sprint: 2` label, tracked reviews and merges, and closed the Sprint 1 submission issue (#13).
 - Designed the Figma screens 6 My Applications (filled and empty), 7 Application Detail (Pending, Approved, Rejected, Withdrawn, with the withdraw dialog), 8 Shelter Profile (New, Pending, Approved, Rejected), and 12 Application Management (filled and empty), plus the error states 401, 403, 404, 409, and 422.
-- Arranged the team's screens in the shared Figma file.
+- Arranged the team's screens in the shared Figma file and checked the user-flow diagrams against the OpenAPI contract (document links instead of uploads, role selection at registration, server-side eligibility check, auto-rejection only for Adopters).
 - Reviewed the architecture document, the vision and API-flow updates, the document status update, and the QA contributions record.
 - Updated `CONTRIBUTIONS.md` and prepared the `sprint-2` release and the submission.
 
 #### Evidence and Links
 
 - **Issues:** [#57](https://github.com/seng321-termproject-pawradise/pawradise/issues/57), [#13](https://github.com/seng321-termproject-pawradise/pawradise/issues/13), [#67](https://github.com/seng321-termproject-pawradise/pawradise/issues/67)
-- **Merged pull requests:** [#60](https://github.com/seng321-termproject-pawradise/pawradise/pull/60)
+- **Merged pull requests:** [#60](https://github.com/seng321-termproject-pawradise/pawradise/pull/60), [#69](https://github.com/seng321-termproject-pawradise/pawradise/pull/69)
 - **Reviews:** [#54](https://github.com/seng321-termproject-pawradise/pawradise/pull/54), [#59](https://github.com/seng321-termproject-pawradise/pawradise/pull/59), [#63](https://github.com/seng321-termproject-pawradise/pawradise/pull/63), [#66](https://github.com/seng321-termproject-pawradise/pawradise/pull/66)
 
 #### Commit History
@@ -167,7 +167,7 @@ Pull requests without a note are merged into `develop`. Pull requests listed as 
 
 - **Issues:** [#53](https://github.com/seng321-termproject-pawradise/pawradise/issues/53), [#58](https://github.com/seng321-termproject-pawradise/pawradise/issues/58)
 - **Merged pull requests:** [#54](https://github.com/seng321-termproject-pawradise/pawradise/pull/54), [#59](https://github.com/seng321-termproject-pawradise/pawradise/pull/59), [#63](https://github.com/seng321-termproject-pawradise/pawradise/pull/63)
-- **Reviews:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#52](https://github.com/seng321-termproject-pawradise/pawradise/pull/52), [#56](https://github.com/seng321-termproject-pawradise/pawradise/pull/56), [#60](https://github.com/seng321-termproject-pawradise/pawradise/pull/60), [#62](https://github.com/seng321-termproject-pawradise/pawradise/pull/62), [#64](https://github.com/seng321-termproject-pawradise/pawradise/pull/64)
+- **Reviews:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#52](https://github.com/seng321-termproject-pawradise/pawradise/pull/52), [#56](https://github.com/seng321-termproject-pawradise/pawradise/pull/56), [#60](https://github.com/seng321-termproject-pawradise/pawradise/pull/60), [#62](https://github.com/seng321-termproject-pawradise/pawradise/pull/62), [#64](https://github.com/seng321-termproject-pawradise/pawradise/pull/64), [#68](https://github.com/seng321-termproject-pawradise/pawradise/pull/68)
 
 #### Commit History
 
@@ -300,12 +300,13 @@ Sprint 2 contributions cover documentation, verification planning and static rev
 
 - Added the admin and shelter endpoints to the OpenAPI contract and raised it to version 0.2.0, including `GET /admin/users` and `expiresIn: 1800` (#19, PR #25).
 - Created the Figma design system (Foundations, Actions & inputs, Cards & feedback, Navigation & guidance) and the screens 1 Login, 2 Register, 3 Animal Listing, 4 Animal Detail, and 5 Adoption Application Form; owner of the shared Figma file.
+- Wrote the UI/UX document (`docs/09-ui-ux.md`) with screen-to-requirement traceability, API operations, confirmation dialogs, error behavior, the FR-05 decision (shared Screen 9), user-flow diagrams, and screen images (`docs/assets/ui-ux/`).
 - Reviewed the renamed Swagger validation evidence.
 
 #### Evidence and Links
 
 - **Issues:** [#19](https://github.com/seng321-termproject-pawradise/pawradise/issues/19)
-- **Merged pull requests:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25)
+- **Merged pull requests:** [#25](https://github.com/seng321-termproject-pawradise/pawradise/pull/25), [#68](https://github.com/seng321-termproject-pawradise/pawradise/pull/68)
 - **Reviews:** [#50](https://github.com/seng321-termproject-pawradise/pawradise/pull/50)
 
 #### Commit History
